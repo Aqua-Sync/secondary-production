@@ -1,0 +1,38 @@
+Type,Site name,Location,Taxa measured,e_p_ratio,Reference
+Streams,Breitenback Stream,Germany,Ephemeroptera,0.04,Castro (1975)1
+Streams,Root spring,"Massachusetts, USA",Diptera,0.14,Teal (1957)1
+Streams,Root spring,"Massachusetts, USA",Diptera,0.2,Teal (1957)1
+Streams,Streams,"Oregon, USA",Diptera,0.27,Speir and Anderson (1974)2
+Streams,Streams,"Oregon, USA",Diptera,0.19,Speir and Anderson (1974)2
+Streams,Streams,"Oregon, USA",Diptera,0.23,Speir and Anderson (1974)2
+Streams,Streams,"Oregon, USA",Diptera,0.18,Speir and Anderson (1974)2
+Streams,Ohanapecosh spring,"Washington, USA",Diptera,0.27,Stockner (1971)1
+Streams,Sycamore Creek,"Arizona, USA",Ephemeroptera,0.15,Jackson and Fisher (1986)
+Streams,Sycamore Creek,"Arizona, USA",Ephemeroptera,0.02,Jackson and Fisher (1986)
+Streams,Sycamore Creek,"Arizona, USA",Ephemeroptera,0.07,Jackson and Fisher (1986)
+Streams,Sycamore Creek,"Arizona, USA",Diptera,0.24,Jackson and Fisher (1986)
+Streams,Sycamore Creek,"Arizona, USA",Diptera,0.29,Jackson and Fisher (1986)
+Streams,Sycamore Creek,"Arizona, USA",Trichoptera,0.27,Jackson and Fisher (1986)
+Streams,Alte Schwentine,Germany,Trichoptera,0.19,Poepperl (2000)
+Streams,Alte Schwentine,Germany,Trichoptera,0.27,Poepperl (2000)
+Streams,Alte Schwentine,Germany,Ephemeroptera,0.15,Poepperl (2000)
+Streams,Alte Schwentine,Germany,Trichoptera,0.26,Poepperl (2000)
+Streams,Alte Schwentine,Germany,Diptera,0.2,Poepperl (2000)
+Lakes,Lake Beloie,USSR,Diptera,0.09,Borutsky (1939)1
+Lakes,Cornell exp. Ponds,"New York, USA",Diptera,0.2,Hall et al. (1970)1
+Lakes,Sewage ponds,"Oregon, USA",Diptera,0.38,Kimerle and Anderson (1971)1
+Lakes,Sewage ponds,"Oregon, USA",Diptera,0.4,Kimerle and Anderson (1971)1
+Lakes,Sugarloaf Lake,"Michigan, USA",Diptera,0.2,Anderson and Hooper 19561
+Lakes,Lake Beloie,USSR,Diptera,0.15,Borutsky (1939)1
+Lakes,Lake Beloie,USSR,Diptera,0.12,Borutsky (1939)1
+Lakes,Char Lake,"Northwest Territories, Canada",Diptera,0.27,"Welch (1973), (1976)"
+Lakes,Lake Esrom,Denmark,Diptera,0.57,Jonasson (1972)
+Lakes,Mirror Lake,"New Hampshire, USA",insects,0.45,Strayer and Likens (1986)
+Lakes,Paajarvi,Finland,zoobenthos,0.06,Sarvala et al. (1981)
+Lakes,Eglwys Nunydd Res.,U.K.,Diptera,0.07,Potter and Learner (1974)
+Lakes,Port-Biehl,France,insects,0.35,Laville (1975)
+Lakes,Mývatn,Iceland,insects,0.52,"Jonasson (1981), Jonasson et al. (1990)"
+Lakes,pond J,"Alaska, USA",insects,0.31,Hobbie (1980)
+Lakes,pond D,"Alaska, USA",insects,0.44,Hobbie (1980)
+Lakes,pond B,"Alaska, USA",insects,0.7,Hobbie (1980)
+Lakes,Ovre Heimdalsvatn,Norway,insects,0.09,Larsson et al. (1978)

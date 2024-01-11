@@ -1,0 +1,14 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Driscoll et al. () estimate that 53000 km2 of lakes in the US have an advisory warning for mercury, along with 1,500,000 km of rivers.
+
+*What is the total area of lakes in the US?*
+
+Based on a very quick scan of the largest lake areas, I'd guess total lentic area on the order of 500,000km2. 
+
+So to a very rough (and conservative) approximation, 10% of surface freshwater has the potential for mercury bioaccumulation.
+
+Driscoll, C. T., Han, Y. J., Chen, C. Y., Evers, D. C., Lambert, K. F., Holsen, T. M., ... & Munson, R. K. (2007). Mercury contamination in forest and freshwater ecosystems in the northeastern United States. BioScience, 57(1), 17-28.
