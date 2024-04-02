@@ -38,6 +38,8 @@ gratton_fi %>%
 
 # get posteriors of proportion of insects
 brm_prop_insects_beta = readRDS("models/brm_prop_insects_beta.rds")
+brm_prop_insects_beta = update(brm_prop_insects_beta, newdata = dat_aispacsp)
+
 
 fi_posts = brm_prop_insects_beta %>% 
   as_draws_df() %>% 
@@ -71,11 +73,12 @@ saveRDS(secondary_prod_sd, file = "data/secondary_prod_sd.rds")
 # Estimate emergence from secondary production ----------------------------
 
 secondary_prod_sd = readRDS(file = "data/secondary_prod_sd.rds") %>% 
-  mutate(lat = parse_number(lat),
-         lon = parse_number(lon))
+  mutate(lat = parse_number(as.character(lat)),
+         lon = parse_number(as.character(lon)))
 
 # prior for E:P from Gratton et al. 
-gratton_ep = read_csv("data/gratton_supplement_C.csv") %>% clean_names()
+gratton_ep = read_csv("data/gratton_supplement_C.csv") %>% clean_names() %>% 
+  filter(type == "Streams")
 
 # ep_model = brm(e_p_ratio ~ 1 + (1|reference) + (1|taxa_measured),
 #                family = Beta(link = "logit"),
@@ -109,7 +112,7 @@ emergence_production %>%
   ggplot(aes(x = mean_emergence_kgdmm2y)) + 
   geom_histogram() +
   scale_x_log10() +
-  # geom_vline(aes(xintercept = 1.05*2*(100/90)*1000)) +# Gratton estimate of insect emergence
+  geom_vline(aes(xintercept = 1.05*2*(100/90)/1000)) +# Gratton estimate of insect emergence
   NULL
 
 emergence_production %>% 

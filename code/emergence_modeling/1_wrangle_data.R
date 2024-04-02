@@ -25,11 +25,19 @@ secondary_prod_wrangled = secondary_prod_raw %>%
                         mass_type == "WM" ~ value*0.2),   # wet to dry correction
          # afdm_mg_m2_y = case_when(mass_type == "AFDM" ~ value,
          #                  mass_type == "DM" ~ value/perc_ash_correction)
-         ) 
+         ) %>% 
+  mutate(mass_type = "DM", 
+         mass_units = "mg_m2_y")
 
 secondary_prod = secondary_prod_wrangled %>% 
   select(-raw_value, -value, - units, -perc_ash, - perc_ash_correction) %>% 
   pivot_wider(names_from = name, values_from = dm_mg_m2_y)
+
+# check
+unique(secondary_prod$mass_type)
+unique(secondary_prod$mass_units)
+is.na(secondary_prod$mass_type)
+is.na(secondary_prod$mass_units)
 
 write_csv(secondary_prod, file = "data/secondary_prod.csv")
 
