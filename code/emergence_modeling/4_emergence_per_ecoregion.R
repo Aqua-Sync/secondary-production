@@ -64,12 +64,15 @@ allen_area_emergence = allen_area_emergence_calc %>%
 write_csv(allen_area_emergence, file = "data/allen_area_emergence.csv")
 
 library(scales)
+allen_area_emergence = read_csv(file = "data/allen_area_emergence.csv")
 
 correct_for_zeros = allen_area_emergence %>% 
   filter(mean_emerge_perbasin_kgdmy != 0) %>% 
   filter(mean_emerge_perbasin_kgdmy == min(mean_emerge_perbasin_kgdmy)) %>% 
   mutate(min_div_2 = mean_emerge_perbasin_kgdmy/2) %>% 
   pull(min_div_2)
+
+saveRDS(correct_for_zeros, file = "data/correct_for_zeros.rds")
 
 emerge_distribution_plot = allen_area_emergence %>%
   mutate(mean = mean_emerge_perbasin_kgdmy + correct_for_zeros,

@@ -2,97 +2,113 @@ library(tidyverse)
 library(brms)
 library(janitor)
 library(tidybayes)
-library(viridis)
 library(scales)
-library(readxl)
 
-# read bioclim variables
-ACSP_Locations_bioclims = read_excel("data/ACSP_Locations_bioclims.xlsx") %>% 
-  rename(index = Index) %>% 
-  select(-SiteID, Xgeo_dd,  Ygeo_dd)
+# function to estimate stream temperatures from air temperature
+# from eq. 2 in Mohseni, O., Erickson, T. R., & Stefan, H. G. (1997). A Non-Linear Regression Model for Weekly Stream Temperatures at 585 Gaging Stations in the US.
+estimate_streamtemp = function(x){
+  numerator = 26.2                           # values are median parameter values from Mohseni et al. Tbl X.
+  denominator = 1 + (exp(0.18*(13.3 - x)))
+  0.8 + (numerator/denominator)
+}
 
-emergence_production = read_csv(file = "data/emergence_production.csv") %>% 
-  separate(site_id, into = c("author", "author2"), extra = "merge") %>% 
-  mutate(year = parse_number(author2)) %>% 
-  mutate(author_year = paste(author, year, sep = "_")) %>% 
-  left_join(ACSP_Locations_bioclims, by = "index") %>% 
-  mutate(temp_s = scale(MeanAnnAir),
-         elev_s = scale(Elevation_),
-         precip_s = scale(AnnPrecip_))
+# load data
+hydroatlas_temps_precip = read_csv("data/Production_wHydrobasinID_06262024.csv") %>% 
+  mutate(tmp_dc_syr = tmp_dc_syr/10) # put temps in dec C instead of 10*dec C
 
-saveRDS(emergence_production, file = "data/emergence_production_bioclim.rds")
-
-emergence_production %>% 
-  ggplot(aes(x = AnnPrecip_, y = mean_emergence_kgdmm2y)) +
-  geom_pointrange(aes(ymin = mean_emergence_kgdmm2y - sd_emergence_kg,
-                      ymax = mean_emergence_kgdmm2y + sd_emergence_kg)) +
-  scale_x_log10() +
-  # scale_y_log10() +
-  NULL
+emergence_production = readRDS("data/emergence_production_bioclim.rds") %>% 
+  ungroup %>% 
+  left_join(hydroatlas_temps_precip) %>% 
+  mutate(emerge_1 = mean_emergence_mgdmm2y/max(mean_emergence_mgdmm2y, na.rm = T),
+         stream_temp = estimate_streamtemp(tmp_dc_syr),
+         stream_temp20 = stream_temp/20) %>%  # reduce range of stream temps to improve model fitting
+  mutate(BAS_ID = as.character(BAS_ID))
 
 
-# brm_emerge = brm(mean_emergence_kgdmm2y|mi(sd_emergence_kg) ~ 1 + (1|author_year),
-#                  data = emergence_production,
-#                  family = Gamma(link = "log"),
-#                  prior = c(prior(normal(-2, 2), class = "Intercept"),
-#                            prior(exponential(10), class = "sd"),
-#                            prior(exponential(10), class = "shape")))
-# # 
+# fit models --------------------------------------------------------------
 
-brm_emerge =readRDS(file = "models/brm_emerge.rds")
+fit_gam_temp = readRDS("models/fit_gam_temp.rds")
+fit_gam_precip = readRDS("models/fit_gam_precip.rds")
+fit_gam_tempprecip = readRDS("models/fit_gam_tempprecip.rds")
+fit_gam_intercept = readRDS("models/fit_gam_intercept.rds")
+fit_gam_tempaddprecip = readRDS(file = "models/fit_gam_tempaddprecip.rds")
 
-# brm_emerge_temp = update(brm_emerge, formula = . ~ temp_s + (1|author_year),
-#                          newdata = emergence_production, 
-#                          iter = 100, chains = 1)
-# brm_emerge_temp = update(brm_emerge_temp, iter = 2000, chains = 4)
-# saveRDS(brm_emerge_temp, file = "models/brm_emerge_temp.rds")
+fit_gam_temp = brm(emerge_1 ~ s(stream_temp20) + (1|author_year) + (1|BAS_ID),
+              family = Gamma(link = "log"),
+              data = emergence_production,
+              chains = 4, iter = 2000,
+              prior = c(prior(normal(-5, 2), class = "Intercept"),
+                        prior(normal(0, 2), class = "b"),
+                        prior(exponential(2), class = "sd"),
+                        prior(exponential(4), class = "shape"))
+)
 
-brm_emerge_temp = readRDS("models/brm_emerge_temp.rds")
+saveRDS(fit_gam_temp, file = "models/fit_gam_temp.rds")
 
+fit_gam_tempprecip = update(fit_gam_temp,
+                            formula = . ~ s(stream_temp20, precip_s) + (1|author_year) + (1|BAS_ID),
+                            newdata = emergence_production,
+                            iter = 2000, chains = 4)
 
-# brm_emerge_elev = update(brm_emerge_temp, formula = . ~ elev_s + (1|author_year), 
-#                            newdata = emergence_production)
-# 
-# brm_emerge_precip = update(brm_emerge_temp, formula = . ~ precip_s + (1|author_year), 
-#                            newdata = emergence_production)
-# 
-# brm_emerge_additive = update(brm_emerge_temp, formula = . ~ precip_s + temp_s + elev_s + (1|author_year), 
-#                              newdata = emergence_production)
-# 
-# brm_emerge_interaction = update(brm_emerge_temp, formula = . ~ precip_s*temp_s*elev_s + (1|author_year), 
-#                                 newdata = emergence_production)
-# 
-# saveRDS(brm_emerge_elev, "models/brm_emerge_elev.rds")
-# saveRDS(brm_emerge_precip, "models/brm_emerge_precip.rds")
-# saveRDS(brm_emerge_interaction, "models/brm_emerge_interaction.rds")
-# saveRDS(brm_emerge_additive, "models/brm_emerge_additive.rds")
+saveRDS(fit_gam_tempprecip, file = "models/fit_gam_tempprecip.rds")
 
-brm_emerge_elev = readRDS("models/brm_emerge_elev.rds")
-brm_emerge_precip = readRDS("models/brm_emerge_precip.rds")
-brm_emerge_interaction = readRDS("models/brm_emerge_interaction.rds")
-brm_emerge_additive = readRDS("models/brm_emerge_additive.rds")
+fit_gam_precip = update(fit_gam_temp,
+                            formula = . ~ s(precip_s) + (1|author_year) + (1|BAS_ID),
+                            newdata = emergence_production,
+                            iter = 2000, chains = 4)
 
+saveRDS(fit_gam_precip, file = "models/fit_gam_precip.rds")
 
-plot_temp = plot(conditional_effects(brm_emerge_temp), points = T)
-plot_elev = plot(conditional_effects(brm_emerge_elev), points = T)
-plot_precip = plot(conditional_effects(brm_emerge_precip), points = T)
+fit_gam_intercept = update(fit_gam_temp,
+                        formula = . ~ 1 + (1|author_year) + (1|BAS_ID),
+                        newdata = emergence_production,
+                        iter = 2000, chains = 4)
 
-plot_temp$temp_s + scale_y_log10()
-plot_elev$elev_s + scale_y_log10()
-plot_precip$precip_s + scale_y_log10()
+saveRDS(fit_gam_intercept, file = "models/fit_gam_intercept.rds")
 
-waic_int = waic(brm_emerge, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
-waic_temp = waic(brm_emerge_temp, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
-waic_elev = waic(brm_emerge_elev, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
-waic_precip = waic(brm_emerge_precip, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
-waic_additive = waic(brm_emerge_additive, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
-waic_interaction = waic(brm_emerge_interaction, newdata = emergence_production %>% filter(!is.na(mean_emergence_kgdmm2y)))
+fit_gam_tempaddprecip = update(fit_gam_temp,
+                            formula = . ~ s(stream_temp20) + s(precip_s) + (1|author_year) + (1|BAS_ID),
+                            newdata = emergence_production,
+                            iter = 2000, chains = 4)
 
-waic_int$estimates %>% 
-  as_tibble() %>% 
-  mutate(model = "intercept only")
+saveRDS(fit_gam_tempaddprecip, file = "models/fit_gam_tempaddprecip.rds")
 
 
+# check models ------------------------------------------------------------
 
+pp_check(fit_gam_intercept, type = "boxplot") 
+pp_check(fit_gam_precip, type = "boxplot")
+pp_check(fit_gam_temp, type = "boxplot") 
+pp_check(fit_gam_tempprecip, type = "boxplot")
+pp_check(fit_gam_tempaddprecip, type = "boxplot")
 
+waic_a = waic(fit_gam_intercept)
+waic_b = waic(fit_gam_temp)
+waic_c = waic(fit_gam_precip)
+waic_d = waic(fit_gam_tempprecip)
+waic_e = waic(fit_gam_tempaddprecip)
+
+loo_compare(waic_a,
+            waic_b,
+            waic_c,
+            waic_d,
+            waic_e)
+
+newdata = tibble(stream_temp20 = seq(from = 0, to = 1.5, length.out = 40)) %>% 
+  expand_grid(precip_s = c(-1, 0, 1)) %>% 
+  mutate(author_year = "new")
+
+mod_averages = pp_average(fit_gam_temp, fit_gam_precip, newdata = newdata, allow_new_levels = T)
+
+mod_averages %>% as_tibble() %>% 
+  mutate(stream_temp20 = newdata$stream_temp20,
+         precip_s = newdata$precip_s) %>% 
+  ggplot(aes(x = stream_temp20)) + 
+  geom_lineribbon(aes(y = Estimate, ymin = Q2.5, ymax = Q97.5)) +
+  facet_wrap(~precip_s)
+
+plot(conditional_effects(fit_gam_precip), points = T)
+plot(conditional_effects(fit_gam_temp), points = T)
+plot(conditional_effects(fit_gam_tempprecip), points = T)
+plot(conditional_effects(fit_gam_tempaddprecip), points = T)
 
