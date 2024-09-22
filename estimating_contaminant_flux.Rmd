@@ -1,0 +1,96 @@
+---
+title: "estimating_flux"
+author: "Jeff Wesner"
+date: "2024-04-23"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+## Purpose
+
+The goal of this document is to demonstrate the workflow for estimating global fluxes of contaminants. The are five primary data requirements.
+
+1.  The global amount of annual insect emergence (mgDM/y)
+2.  The proportion of emergence that is carrying a given contaminant
+3.  The effect of the contaminant on insect emergence
+4.  The concentration of the contaminant in the surviving adult aquatic insects
+5.  The global amount of contaminant flux from adult aquatic insects
+
+A sixth data need that is not addressed here is the spatial location of this flux (i.e., *where* does the flux happen on earth?). This will come from the spatial mapping approaches.
+
+## Approach
+
+
+```{r echo=FALSE, fig.cap="Figure 1. Schematic approach of the steps needed to estimate global contamiant (or nutrient) flux by adult aquatic insect emergence.", out.width = '100%'}
+
+knitr::include_graphics(here::here("plots/schematic.jpg"))
+```
+
+Our overall approach (Figure 1) is to use literature estimates and Bayesian modeling to quantify the uncertainty in each of the data needs above, and then combine that uncertainty into estimates of the global flux of contaminants transported by emerging aquatic insects from rivers each year. This approach focuses on contaminants, but nutrient flux can be added using the same methods.
+
+We address 1-5 above (Figure 1) as follows, using mercury as a case study:
+
+### 1. The global amount of annual insect emergence (mgDM/y)
+
+The original data set contained X records of total community macroinvertebrate annual production. A smaller number included information on only insect community production, which is the measure we are interested in, since it is only the insects that emerge. To obtain estimates of insect production from the community production data, we first estimated the proportion of community production that was insects using an intercept only Beta model with the raw proportions as the response variable (using only data that had both total community and insect-only production). We then multiplied the posterior of the Beta model by estimates of total community production, yielding modeled estimates of aquatic insect secondary production (mean and sd) for each collection.
+
+Next, we estimated the fraction of this annual insect production that emerged each year using data published in Gratton et al. (2008). We fit a random effects model to the Gratton data with varying intercepts for taxon and study.
+
+We then used a Monte Carlo approach to multiple the estimates of annual insect secondary production by the fraction emerging each year ($\sim$ 0.19), yielding n = 173 mean +/- sd estimates of insect emergence (mgDM/m2/y). Based on the location of those estimates, we assigned values for mean annual air temperature, elevation, and other predictor variables from the BIOCLIM data set.
+
+To estimate emergence as a function of temperature, we fit a Bayesian generalized linear mixed model with emergence as the response variable (posterior mean weighted by it's sd), temperature as the predictor, and study (author/year) as a varying intercept. The likelihood was Gamma, since the data were positive and continuous. This model revealed a weak positive relationship between emergence and mean annual air temperature.
+
+We then used the emergence vs temperature model to estimate total emergence in the $\sim 47000$ river basins reported by Allen and Pavelsky (2018). We assigned a mean annual air temperature to each basin and then used the posterior predictive distribution of the Gamma regression to predict annual emergence in a based in units of mgDM/m2/y. Then, we mutiplied that prediction by the area of river water in each based to yield a total basin flux of mgDM/y. Summing that across basins yields a global estimate of insect emergence from rivers each year:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(tidybayes)
+global_flux = readRDS(file = "posteriors/global_flux.rds")
+
+global_flux %>% 
+  reframe(median_MTdmy = median(global_kgdmy/1000),
+          mean_MTdmy = mean(global_kgdmy/1000),
+          sd_MTdmy = sd(global_kgdmy/1000),
+          low95_MTdmy = quantile(global_kgdmy/1000, probs = 0.025),
+          high95_MTdmy = quantile(global_kgdmy/1000, probs = 0.975)) %>% 
+  pivot_longer(everything()) %>% 
+  rename(statistic = name,
+         `MT/dm/y` = value)
+```
+
+The results indicate that rivers export a mean of $\sim 540000$ metric tons (MT) of emerging insect dry mass each year with a 95% credible interval of 182,000 to 1,270,000 MTdm/y.
+
+### 2. The proportion of emergence that is carrying a given contaminant
+
+Of the $\sim 540000$ MTdm/y emergence, some fraction is carrying contaminants. For example, if 2% of surface river water is contaminated with Hg, then we might assume that 2% of emergence, or 0.02 $\times$ 540,000 = 10,800 MTdm/y will contain Hg. We are not aware of direct estimates of contaminant coverage globally.
+
+*Example for Mercury* To estimate the proportion of river area (and hence insect emergence) impacted by Hg, we used Peterson et al. Environ. Sci. Technol. 2007, 41, 1, 58–65. Using random surveys of fish from western US rivers, they reported that "11% of the assessed stream length" contained fish with more than 0.1 $\mu$gHg/g. Anything below this level is consided save for consumption by fish-eating mammals. Thus, we made the simplifying assumption that 11% of stream lengths (and hence area) would also result in Hg bioaccumulation in insects. However, Peterson et al. (2007) measured only streams $\leq$ 60m wide. Therefore, we needed to also assess how much of global stream widths are $\leq$60m wide so that we can model Hg in a similar set of streams (NOTE: Perhaps we can assume that Hg is also accumulating in larger rivers, but here we assume that anything greater than 60m has zero Hg).
+
+To assess the proportion of stream widths globally that are >60m wide, we used the Pareto distrbution equation from Allen and Pavelsky (2018). The estimated that stream widths globally are distrbuted as a power law with a Pareto shape parameter of $\sim$0.83. We simulated 10,000 stream widths using the `rpareto()` function from the `VGAM` package, and calculated the proportion of stream widths $\leq$60m. The result indicates that 99% of stream widths are likely less than 60m wide.
+
+Hence, we assumed that the global flux of insects carrying Hg was/ $540000 x 0.99 x 0.11 = 58806$MTdm/y. 
+
+### 3.  The effect of the contaminant on insect emergence
+For Hg, we did not assume any effect on insect emergence. For contaminants that do have an effect on insect emergence, we would add an additional multiplier to equation above (with uncertainty included as well). For example, if a contaminant is expected to reduce emergenc by 0.5, then the value above would $58806 x 0.5 = 29503$MTdm/y
+
+### 4.  The concentration of the contaminant in the surviving adult aquatic insects
+To estimate the concentration of contaminants in adult aquatic insects, we used literature extractions for X contamintants that reported either adult aquatic insect tissue concentrations, water concentrations, and/or sediment concentrations. 
+
+*Example for mercury* Using the 52(ish) measures of Hg in adult aquatic insects, we ran a generalized linear model with adult Hg concentration as the response variable, sediment Hg concentration as the predictor variable, and study as a varying intercept. It suggested that the mean Hg concentration in adult aquatic insects is ~0.2 HgngDM/g 
+
+### 5. The global amount of contaminant flux from adult aquatic insects 
+Given the posterior predictions of the amount of potentially contaminated insect emergence (~58,806 MTdm/y) along with the posterior predictions of Hg concentration in those insect, we estimate that the mean annual flux of Hg in emerging aquatic insects is:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+mercury_flux_global = readRDS(file = "posteriors/mercury_flux_global.rds")
+
+mercury_flux_global %>% 
+  group_by(proportion_with_mercury) %>% 
+  median_qi(global_flux_mercury_kg_y) %>% 
+  mutate(proportion_with_mercury = round(proportion_with_mercury, 2),
+         global_flux_mercury_kg_y = round(global_flux_mercury_kg_y,1),
+         .lower = round(.lower, 1),
+         .upper = round(.upper, 1))
+```
+The table above gives five scenarios for the proportion of global emergence impacted by Hg, from 1% to 23%. This provides a range of scenarios centered around Peterson et al.'s estimate of 11%. The results suggest that emerging aquatic insects transport between 1 and 30 kg of Hg per year. For perspective, Pacific salmon of North America transport ~ 7kg Hg/yr from marine to freshwater (Brandt et al. in review). Hence, these estimates appear reasonable to at least an order of magnitude. 
