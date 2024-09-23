@@ -1,0 +1,273 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={estimating\_flux},
+  pdfauthor={Jeff Wesner},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{estimating\_flux}
+\author{Jeff Wesner}
+\date{2024-04-23}
+
+\begin{document}
+\maketitle
+
+\hypertarget{purpose}{%
+\subsection{Purpose}\label{purpose}}
+
+The goal of this document is to demonstrate the workflow for estimating
+global fluxes of contaminants. The are five primary data requirements.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  The global amount of annual insect emergence (mgDM/y)
+\item
+  The proportion of emergence that is carrying a given contaminant
+\item
+  The effect of the contaminant on insect emergence
+\item
+  The concentration of the contaminant in the surviving adult aquatic
+  insects
+\item
+  The global amount of contaminant flux from adult aquatic insects
+\end{enumerate}
+
+A sixth data need that is not addressed here is the spatial location of
+this flux (i.e., \emph{where} does the flux happen on earth?). This will
+come from the spatial mapping approaches.
+
+\hypertarget{approach}{%
+\subsection{Approach}\label{approach}}
+
+\begin{figure}
+\includegraphics[width=1\linewidth]{plots/schematic} \caption{Figure 1. Schematic approach of the steps needed to estimate global contamiant (or nutrient) flux by adult aquatic insect emergence.}\label{fig:unnamed-chunk-1}
+\end{figure}
+
+Our overall approach (Figure 1) is to use literature estimates and
+Bayesian modeling to quantify the uncertainty in each of the data needs
+above, and then combine that uncertainty into estimates of the global
+flux of contaminants transported by emerging aquatic insects from rivers
+each year. This approach focuses on contaminants, but nutrient flux can
+be added using the same methods.
+
+We address 1-5 above (Figure 1) as follows, using mercury as a case
+study:
+
+\hypertarget{the-global-amount-of-annual-insect-emergence-mgdmy}{%
+\subsubsection{1. The global amount of annual insect emergence
+(mgDM/y)}\label{the-global-amount-of-annual-insect-emergence-mgdmy}}
+
+The original data set contained X records of total community
+macroinvertebrate annual production. A smaller number included
+information on only insect community production, which is the measure we
+are interested in, since it is only the insects that emerge. To obtain
+estimates of insect production from the community production data, we
+first estimated the proportion of community production that was insects
+using an intercept only Beta model with the raw proportions as the
+response variable (using only data that had both total community and
+insect-only production). We then multiplied the posterior of the Beta
+model by estimates of total community production, yielding modeled
+estimates of aquatic insect secondary production (mean and sd) for each
+collection.
+
+Next, we estimated the fraction of this annual insect production that
+emerged each year using data published in Gratton et al.~(2008). We fit
+a random effects model to the Gratton data with varying intercepts for
+taxon and study.
+
+We then used a Monte Carlo approach to multiple the estimates of annual
+insect secondary production by the fraction emerging each year
+(\textasciitilde0.19), yielding n = 173 mean +/- sd estimates of insect
+emergence (mgDM/m2/y). Based on the location of those estimates, we
+assigned values for mean annual air temperature, elevation, and other
+predictor variables from the BIOCLIM data set.
+
+To estimate emergence as a function of temperature, we fit a Bayesian
+generalized linear mixed model with emergence as the response variable
+(posterior mean weighted by it's sd), temperature as the predictor, and
+study (author/year) as a varying intercept. The likelihood was Gamma,
+since the data were positive and continuous. This model revealed a weak
+positive relationship between emergence and mean annual air temperature.
+
+We then used the emergence vs temperature model to estimate total
+emergence in the \(\sim 47000\) river basins reported by Allen and
+Pavelsky (2018). We assigned a mean annual air temperature to each basin
+and then used the posterior predictive distribution of the Gamma
+regression to predict annual emergence in a based in units of mgDM/m2/y.
+Then, we mutiplied that prediction by the area of river water in each
+based to yield a total basin flux of mgDM/y. Summing that across basins
+yields a global estimate of insect emergence from rivers each year:
+
+\begin{verbatim}
+## # A tibble: 5 x 2
+##   statistic    `MT/dm/y`
+##   <chr>            <dbl>
+## 1 median_MTdmy   472631.
+## 2 mean_MTdmy     540148.
+## 3 sd_MTdmy       298869.
+## 4 low95_MTdmy    182136.
+## 5 high95_MTdmy  1277135.
+\end{verbatim}
+
+The results indicate that rivers export a mean of \(\sim 540000\) metric
+tons (MT) of emerging insect dry mass each year with a 95\% credible
+interval of 182,000 to 1,270,000 MTdm/y.
+
+\hypertarget{the-proportion-of-emergence-that-is-carrying-a-given-contaminant}{%
+\subsubsection{2. The proportion of emergence that is carrying a given
+contaminant}\label{the-proportion-of-emergence-that-is-carrying-a-given-contaminant}}
+
+Of the \(\sim 540000\) MTdm/y emergence, some fraction is carrying
+contaminants. For example, if 2\% of surface river water is contaminated
+with Hg, then we might assume that 2\% of emergence, or
+0.02\$\times\$540,000 = 10,800 MTdm/y will contain Hg. We are not aware
+of direct estimates of contaminant coverage globally.
+
+\emph{Example for Mercury} To estimate the proportion of river area (and
+hence insect emergence) impacted by Hg, we used Peterson et al.~Environ.
+Sci. Technol. 2007, 41, 1, 58--65. Using random surveys of fish from
+western US rivers, they reported that ``11\% of the assessed stream
+length'' contained fish with more than 0.1 \(\mu\)gHg/g. Anything below
+this level is consided save for consumption by fish-eating mammals.
+Thus, we made the simplifying assumption that 11\% of stream lengths
+(and hence area) would also result in Hg bioaccumulation in insects.
+However, Peterson et al.~(2007) measured only streams \(\leq\) 60m wide.
+Therefore, we needed to also assess how much of global stream widths are
+\$\leq\$60m wide so that we can model Hg in a similar set of streams
+(NOTE: Perhaps we can assume that Hg is also accumulating in larger
+rivers, but here we assume that anything greater than 60m has zero Hg).
+
+To assess the proportion of stream widths globally that are
+\textgreater60m wide, we used the Pareto distrbution equation from Allen
+and Pavelsky (2018). The estimated that stream widths globally are
+distrbuted as a power law with a Pareto shape parameter of \$\sim\$0.83.
+We simulated 10,000 stream widths using the \texttt{rpareto()} function
+from the \texttt{VGAM} package, and calculated the proportion of stream
+widths \$\leq\$60m. The result indicates that 99\% of stream widths are
+likely less than 60m wide.
+
+Hence, we assumed that the global flux of insects carrying Hg was/
+\(540000 x 0.99 x 0.11 = 58806\)MTdm/y.
+
+\hypertarget{the-effect-of-the-contaminant-on-insect-emergence}{%
+\subsubsection{3. The effect of the contaminant on insect
+emergence}\label{the-effect-of-the-contaminant-on-insect-emergence}}
+
+For Hg, we did not assume any effect on insect emergence. For
+contaminants that do have an effect on insect emergence, we would add an
+additional multiplier to equation above (with uncertainty included as
+well). For example, if a contaminant is expected to reduce emergenc by
+0.5, then the value above would \(58806 x 0.5 = 29503\)MTdm/y
+
+\hypertarget{the-concentration-of-the-contaminant-in-the-surviving-adult-aquatic-insects}{%
+\subsubsection{4. The concentration of the contaminant in the surviving
+adult aquatic
+insects}\label{the-concentration-of-the-contaminant-in-the-surviving-adult-aquatic-insects}}
+
+To estimate the concentration of contaminants in adult aquatic insects,
+we used literature extractions for X contamintants that reported either
+adult aquatic insect tissue concentrations, water concentrations, and/or
+sediment concentrations.
+
+\emph{Example for mercury} Using the 52(ish) measures of Hg in adult
+aquatic insects, we ran a generalized linear model with adult Hg
+concentration as the response variable, sediment Hg concentration as the
+predictor variable, and study as a varying intercept. It suggested that
+the mean Hg concentration in adult aquatic insects is \textasciitilde0.2
+HgngDM/g
+
+\hypertarget{the-global-amount-of-contaminant-flux-from-adult-aquatic-insects}{%
+\subsubsection{5. The global amount of contaminant flux from adult
+aquatic
+insects}\label{the-global-amount-of-contaminant-flux-from-adult-aquatic-insects}}
+
+Given the posterior predictions of the amount of potentially
+contaminated insect emergence (\textasciitilde58,806 MTdm/y) along with
+the posterior predictions of Hg concentration in those insect, we
+estimate that the mean annual flux of Hg in emerging aquatic insects is:
+
+\begin{verbatim}
+## # A tibble: 5 x 7
+##   proportion_with_mercury global_flux_mercury_kg_y .lower .upper .width .point
+##                     <dbl>                    <dbl>  <dbl>  <dbl>  <dbl> <chr> 
+## 1                    0.01                      1.3    0.4    4.2   0.95 median
+## 2                    0.05                      6.5    2.2   21.2   0.95 median
+## 3                    0.11                     14.4    4.8   46.6   0.95 median
+## 4                    0.17                     22.2    7.4   72     0.95 median
+## 5                    0.23                     30.1    9.9   97.4   0.95 median
+## # i 1 more variable: .interval <chr>
+\end{verbatim}
+
+The table above gives five scenarios for the proportion of global
+emergence impacted by Hg, from 1\% to 23\%. This provides a range of
+scenarios centered around Peterson et al.'s estimate of 11\%. The
+results suggest that emerging aquatic insects transport between 1 and 30
+kg of Hg per year. For perspective, Pacific salmon of North America
+transport \textasciitilde{} 7kg Hg/yr from marine to freshwater (Brandt
+et al.~in review). Hence, these estimates appear reasonable to at least
+an order of magnitude.
+
+\end{document}
