@@ -1,0 +1,17 @@
+chemical_original,chemical_new,question
+Hg,Hg,Do we need these four mercury types?
+Hg inorg,Hg inorg,Do we need these four mercury types?
+MeHg,MeHg,Do we need these four mercury types?
+THg,THg,Do we need these four mercury types?
+Cu (NP),Cu,Do we need the NP designation? Can this be combined with just Cu measures in the original table?
+EPB ethylparaben,Ethylparaben,Is EPB ethylparaben different from just Ethylparaben?
+MPB methylparaben,Methylparaben,Is MPB methylparaben different from just methylparaben?
+PCB,PCB,Can any of these PCBs be considered the same?
+PCB101,PCB101,Can any of these PCBs be considered the same?
+PCB118,PCB118,Can any of these PCBs be considered the same?
+PCB138,PCB138,Can any of these PCBs be considered the same?
+PCB153,PCB153,Can any of these PCBs be considered the same?
+PCB180,PCB180,Can any of these PCBs be considered the same?
+PCB28,PCB28,Can any of these PCBs be considered the same?
+PCB52,PCB52,Can any of these PCBs be considered the same?
+sum_7 PCBs,sum_7 PCBs,Can any of these PCBs be considered the same?
