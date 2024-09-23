@@ -38,15 +38,16 @@ yuval_raw_summed = yuval_raw_data %>%
   group_by(sample_id, aggregated_biome, sub_phylum) %>% 
   reframe(numerical_value = sum(numerical_value))
 
-brm_yuval = brm(numerical_value ~ 1 + (1|sample_id) + (1|aggregated_biome) + (1|sub_phylum),
-                family = hurdle_gamma(),
-                data = yuval_raw_data,
-                prior = c(prior(normal(1, 1), class = "Intercept"),
-                          prior(exponential(2), class = "sd")),
-                chains = 1, iter = 1000)
+# brm_yuval = brm(numerical_value ~ 1 + (1|sample_id) + (1|aggregated_biome) + (1|sub_phylum),
+#                 family = hurdle_gamma(),
+#                 data = yuval_raw_data,
+#                 prior = c(prior(normal(1, 1), class = "Intercept"),
+#                           prior(exponential(2), class = "sd")),
+#                 chains = 1, iter = 1000)
 
-saveRDS(brm_yuval, file = "models/brm_yuval.rds")
+# saveRDS(brm_yuval, file = "models/brm_yuval.rds")
 
+brm_yuval = readRDS(file = "models/brm_yuval.rds")
 
 brm_yuval_posts = brm_yuval$data %>% 
   distinct(aggregated_biome, sub_phylum) %>% 

@@ -4,7 +4,6 @@ library(tidybayes)
 # load data
 data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
 
-
 # load flux summaries -----------------------------------------------------
 
 # List all files that start with "flux_predictionstest"
@@ -54,14 +53,4 @@ flux_region = bind_rows(flux_region_list)
 
 saveRDS(flux_region, file = "posteriors/flux_region.rds")
 
-flux_region = bind_rows(flux_posterior_list)  %>% 
-  group_by(.draw) %>% 
-  reframe(kgyr_global = sum(kgdmhybasyr))
 
-flux_global %>% 
-  ggplot(aes(x = kgyr_global)) +
-  geom_histogram() +
-  scale_x_log10() +
-  geom_vline(xintercept = 1.54e+09)
-
-median(emergence_production$acsp, na.rm = T)

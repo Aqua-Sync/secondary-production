@@ -46,58 +46,60 @@ emergence_production_with_vars = emergence_production %>%
                                   TRUE ~ "notimpacted"))
 
 # load prefit models
-updated_gams = readRDS("models/updated_gams.rds")
+updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below
 
 # fit models ---------------------
-# fit full precip model, then use update for subsequent models since the priors remain the same (due to standardized predictors)
-fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID),
-                     family = Gamma(link = "log"),
-                     data = emergence_production_with_vars,
-                     prior = c(prior(normal(-5, 2), class = Intercept),
-                               prior(normal(0, 2), class = b),
-                               prior(exponential(2), class = sd),
-                               prior(exponential(4), class = shape)), 
-                     save_pars = save_pars(all = T))
 
-fit_gam_temp = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_tempprecip = update(fit_gam_precip, formula = . ~ s(precip_s, stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_intercept = update(fit_gam_precip, formula = . ~ (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
-                           prior = c(prior(normal(-5, 2), class = Intercept),
-                                     # prior(normal(0, 2), class = b),
-                                     prior(exponential(2), class = sd),
-                                     prior(exponential(4), class = shape)))
-fit_gam_tempaddprecip = update(fit_gam_precip, formula = . ~ s(precip_s) + s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_s93 = update(fit_gam_precip, formula = . ~ s(hft_ix_s93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_u93 = update(fit_gam_precip, formula = . ~ s(hft_ix_u93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_s09 = update(fit_gam_precip, formula = . ~ s(hft_ix_s09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_elevation = update(fit_gam_precip, formula = . ~ s(ele_mt_sav_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_discharge = update(fit_gam_precip, formula = . ~ s(logdis_m3_pyr_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_forest = update(fit_gam_precip, formula = . ~ s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_cropland = update(fit_gam_precip, formula = . ~ s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_tempadddischarge = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_tempadddischargeforest = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) +
-                                         s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# The individudal models below are all stored in a single .rds "models/updated_gams.rds"
+# fit full precip model, then use update for subsequent models since the priors remain the same (due to standardized predictors)
+# fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID),
+#                      family = Gamma(link = "log"),
+#                      data = emergence_production_with_vars,
+#                      prior = c(prior(normal(-5, 2), class = Intercept),
+#                                prior(normal(0, 2), class = b),
+#                                prior(exponential(2), class = sd),
+#                                prior(exponential(4), class = shape)), 
+#                      save_pars = save_pars(all = T))
+# 
+# fit_gam_temp = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_tempprecip = update(fit_gam_precip, formula = . ~ s(precip_s, stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_intercept = update(fit_gam_precip, formula = . ~ (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+#                            prior = c(prior(normal(-5, 2), class = Intercept),
+#                                      # prior(normal(0, 2), class = b),
+#                                      prior(exponential(2), class = sd),
+#                                      prior(exponential(4), class = shape)))
+# fit_gam_tempaddprecip = update(fit_gam_precip, formula = . ~ s(precip_s) + s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_footprint_s93 = update(fit_gam_precip, formula = . ~ s(hft_ix_s93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_footprint_u93 = update(fit_gam_precip, formula = . ~ s(hft_ix_u93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_footprint_s09 = update(fit_gam_precip, formula = . ~ s(hft_ix_s09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_elevation = update(fit_gam_precip, formula = . ~ s(ele_mt_sav_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_discharge = update(fit_gam_precip, formula = . ~ s(logdis_m3_pyr_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_forest = update(fit_gam_precip, formula = . ~ s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_cropland = update(fit_gam_precip, formula = . ~ s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_tempadddischarge = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+# fit_gam_tempadddischargeforest = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) +
+#                                          s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
 
 # put into a list
-updated_gams = list(fit_gam_precip,
-                    fit_gam_temp,
-                    fit_gam_tempprecip,
-                    fit_gam_intercept,
-                    fit_gam_tempaddprecip,
-                    fit_gam_footprint_s93,
-                    fit_gam_footprint_u93,
-                    fit_gam_footprint_s09,
-                    fit_gam_footprint_u09,
-                    fit_gam_elevation,
-                    fit_gam_discharge,
-                    fit_gam_forest,
-                    fit_gam_cropland,
-                    fit_gam_tempadddischarge,
-                    fit_gam_tempadddischargeforest)
+# updated_gams = list(fit_gam_precip,
+#                     fit_gam_temp,
+#                     fit_gam_tempprecip,
+#                     fit_gam_intercept,
+#                     fit_gam_tempaddprecip,
+#                     fit_gam_footprint_s93,
+#                     fit_gam_footprint_u93,
+#                     fit_gam_footprint_s09,
+#                     fit_gam_footprint_u09,
+#                     fit_gam_elevation,
+#                     fit_gam_discharge,
+#                     fit_gam_forest,
+#                     fit_gam_cropland,
+#                     fit_gam_tempadddischarge,
+#                     fit_gam_tempadddischargeforest)
 
-saveRDS(updated_gams, file = "models/updated_gams.rds")
+# saveRDS(updated_gams, file = "models/updated_gams.rds")  # 
 
 
 # compare models  ---------------------
