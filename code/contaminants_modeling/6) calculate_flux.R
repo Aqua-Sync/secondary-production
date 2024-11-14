@@ -63,13 +63,15 @@ hybas_predictions %>%
               arrange(x_s) %>% 
               slice_sample(n = 70000)) %>% 
   # sample_n(80000) %>%
-  ggplot(aes(x = x_s, y = y)) +
+  ggplot(aes(x = exp((x_s*sd_x) + mean_x), y = y)) +
   geom_line() +
   geom_ribbon(aes(ymin = y_lower, ymax = y_upper), alpha = 0.2) +
   geom_point(data = mod$data ,
-             aes(y = y_s*max_adult_conc,
-                 x = x_s), color = 'red') +
+             aes(y = y_s*max_adult_conc), color = 'red') +
+  labs(y = "Se flux (mg/kgDM/y)",
+       x = "Se water (\u03bcg/l)") +
   # scale_y_log10() +
+  scale_x_log10() +
   NULL
 
 sum(hybas_predictions$chem_flux_mg_year_lower, na.rm = T)/1e06

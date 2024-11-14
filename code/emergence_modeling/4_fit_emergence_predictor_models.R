@@ -50,6 +50,15 @@ updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual
 
 # fit models ---------------------
 
+updated_gams_list = list()
+
+for(i in 1:length(updated_gams)){
+  updated_gams_list[[i]] = update(updated_gams[[i]], newdata = emergence_production_with_vars)
+}
+
+updated_gams = updated_gams_list
+saveRDS(updated_gams, file = "models/updated_gams.rds")
+
 # The individual models below are all stored in a single .rds "models/updated_gams.rds"
 # fit full precip model, then use update for subsequent models since the priors remain the same (due to standardized predictors)
 # fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID),
