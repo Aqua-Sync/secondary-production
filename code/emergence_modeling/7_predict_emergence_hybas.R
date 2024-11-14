@@ -1,6 +1,8 @@
 library(tidyverse)
 library(tidybayes)
 
+# Use the fitted parameters from regression models to predict emergence at unmeasured sites
+
 # load data
 data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
 # load models

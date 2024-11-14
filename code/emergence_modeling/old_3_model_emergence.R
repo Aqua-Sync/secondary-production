@@ -5,24 +5,38 @@ library(tidybayes)
 library(viridis)
 library(scales)
 
+# 1) load raw emergence data
 emergence_production = read_csv(file = "data/emergence_production.csv") %>% 
   separate(site_id, into = c("author", "author2"), extra = "merge") %>% 
   mutate(year = parse_number(author2)) %>% 
   mutate(author_year = paste(author, year, sep = "_"))
 
-# brm_emerge = brm(mean_emergence_kgdmm2y|mi(sd_emergence_kg) ~ 1 + (1|author_year),
-#                  data = emergence_production,
-#                  family = Gamma(link = "log"),
-#                  prior = c(prior(normal(-2, 2), class = "Intercept"),
-#                            prior(exponential(10), class = "sd"),
-#                            prior(exponential(10), class = "shape")))
-# # 
-# saveRDS(brm_emerge, file = "models/brm_emerge.rds")
+# 2) fit emergence model
+brm_emerge = brm(mean_emergence_kgdmm2y|mi(sd_emergence_kg) ~ 1 + (1|author_year),
+                 data = emergence_production,
+                 family = Gamma(link = "log"),
+                 prior = c(prior(normal(-2, 2), class = "Intercept"),
+                           prior(exponential(10), class = "sd"),
+                           prior(exponential(10), class = "shape")))
+#
+saveRDS(brm_emerge, file = "models/brm_emerge.rds")
 
-brm_emerge = update(readRDS(file = "models/brm_emerge.rds"),
-                            newdata = emergence_production)
+# brm_emerge = update(readRDS(file = "models/brm_emerge.rds"),
+#                             newdata = emergence_production)
 
-pp_check(brm_emerge)
+brm_emerge = readRDS(file= "models/brm_emerge.rds")
+
+brm_emerge_2 = brm(mean_emergence_kgdmm2y|mi(sd_emergence_kg) ~ 1 + (1|author_year),
+                 data = emergence_production,
+                 family = Gamma(link = "log"),
+                 prior = c(prior(normal(-2, 2), class = "Intercept"),
+                           prior(exponential(2), class = "sd"),
+                           prior(exponential(2), class = "shape")),
+                 chains = 1)
+
+saveRDS(brm_emerge_2, file = "models/temporary/brm_emerge_2.rds")
+
+pp_check(brm_emerge, type = "boxplot")
 
 
 # Show estimates
@@ -31,11 +45,13 @@ author_sims = emergence_production %>%
   mutate(sd_emergence_kg = 1)  %>% 
   add_epred_draws(brm_emerge, re_formula = NULL)
 
-
 author_sims %>% 
-  ggplot(aes(y = reorder(author_year, .epred), x = .epred)) + 
+  ggplot(aes(y = author_year, x = .epred)) + 
   stat_pointinterval() +
-  # scale_y_log10() +
+  scale_x_log10() +
+  geom_point(data = emergence_production, aes(x = mean_emergence_kgdmm2y,
+                                              alpha = sd_emergence_kg),
+             color = "red") +
   NULL
 
 # Estimate global fluxes --------------------------------------------------
