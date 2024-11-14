@@ -1,58 +1,77 @@
 library(tidyverse)
+library(brms)
+library(tidybayes)
 
 # load data
+contaminants = readRDS(file = "data/contaminants.rds")
 flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds")
 selenium_predictions_all = readRDS("data/selenium_jeff.rds") %>% rename(HYBAS_ID = HYBAS_L12) %>% 
   mutate(HYBAS_ID = as.numeric(HYBAS_ID),
-         se_units = "log10_ug_l",
-         se_corrected = mean.conc.year*mean.det.year) %>% 
-  mutate(water_se_ug_l = exp(se_corrected))
+         mean.conc.year_units = "log10_ug_l",
+         water_se_ug_l_raw = 10^(mean.conc.year*mean.det.year),
+         log_water_se_ug_l = log(water_se_ug_l_raw))
 
-# get parameters
-cont_s = readRDS(file = "data/cont_s.rds")
-brm_se = readRDS(file = "models/brm_se.rds")
-mean_se = cont_s %>% filter(chemical == "se") %>% filter(!is.na(log_water_conc_ugl)) %>% 
-  reframe(mean = mean(log_water_conc_ugl)) %>% pull()
-sd_se = cont_s %>% filter(chemical == "se") %>% filter(!is.na(log_water_conc_ugl)) %>% 
-  reframe(mean = sd(log_water_conc_ugl)) %>% pull()
-max_bug_se = cont_s %>% filter(chemical == "se") %>% filter(adult_conc_ng_mg_dm == max(adult_conc_ng_mg_dm)) %>% 
-  distinct(adult_conc_ng_mg_dm) %>% pull(adult_conc_ng_mg_dm)
+# get parameters of adult_conc ~ a + b*water_conc
+mod_list = readRDS(file = "models/mod_list.rds")
 
-int_slope_post = as_draws_df(brm_se) %>% 
-  reframe(int = mean(b_Intercept),
-          slope = mean(b_x_s))
+mod = mod_list[[5]]
 
+mean_x = mod$data2$mean_x$`scaled:center`
+sd_x = mod$data2$sd_x$`scaled:scale`
+max_adult_conc = mod$data2$max_y
+
+int_slope_post = as_draws_df(mod) %>% 
+  reframe(int = median(b_Intercept),
+          int_lower = quantile(b_Intercept, probs = 0.025),
+          int_upper = quantile(b_Intercept, probs = 0.975),
+          slope = median(b_x_s),
+          slope_lower = quantile(b_x_s, probs = 0.025),
+          slope_upper = quantile(b_x_s, probs = 0.975))
 
 # combine
-se_hybas_predictions = flux_predictions_all %>% 
+hybas_predictions = flux_predictions_all %>% 
   # slice(1:10) %>% 
-  left_join(selenium_predictions_all) %>% 
-  mutate(x_s = (se_corrected*sd_se) + mean_se) %>% 
-  mutate(x_s = case_when(is.na(x_s) ~ 0.00001*mean_se,
-                         TRUE ~ x_s)) %>% 
-  # select(HYBAS_ID, x_s) %>% 
+  right_join(selenium_predictions_all) %>% 
+  mutate(x_s = (log_water_se_ug_l - mean_x)/sd_x) %>% 
   mutate(int = int_slope_post$int,
-         slope = int_slope_post$slope) %>% 
-  mutate(y_s = exp(int + slope*x_s)) %>% 
-  mutate(y = y_s*max_bug_se,
-         element = "se",
+         slope = int_slope_post$slope,
+         int_lower = int_slope_post$int_lower,
+         int_upper = int_slope_post$int_upper,
+         slope_lower = int_slope_post$slope_lower,
+         slope_upper = int_slope_post$slope_upper) %>% 
+  mutate(y_s = exp(int + slope*x_s),
+         y_s_lower = exp(int_lower + slope_lower*x_s),
+         y_s_upper = exp(int_upper + slope_upper*x_s)) %>% 
+  mutate(y = y_s*max_adult_conc,
+         y_lower = y_s_lower*max_adult_conc,
+         y_upper = y_s_upper*max_adult_conc,
+         element = mod$data2$chemical_category,
          bug_conc_units = "ng_mg_dm") %>% 
-  mutate(y_mg_kg = y) %>% 
-  mutate(chem_flux_mg_year = y_mg_kg*mean)
+  mutate(y_mg_kg = y,
+         y_mg_kg_lower = y_lower,
+         y_mg_kg_upper = y_upper) %>% 
+  mutate(chem_flux_mg_year = y_mg_kg*mean,
+         chem_flux_mg_year_lower = y_mg_kg_lower*mean,
+         chem_flux_mg_year_upper = y_mg_kg_upper*mean)
 
-se_hybas_to_plot = se_hybas_predictions %>% select(HYBAS_ID, mean, chem_flux_mg_year) %>% 
+se_hybas_to_plot = hybas_predictions %>% select(HYBAS_ID, mean, starts_with("chem_flux_mg_year")) %>% 
   rename(bug_flux_kg_year = mean)
 
-saveRDS(se_hybas_to_plot, file = "data/se_hybas_to_plot.rds")
-
-se_hybas_predictions %>% 
-  sample_n(10000) %>% 
+hybas_predictions %>%
+  filter(x_s == min(x_s, na.rm = T)|x_s == max(x_s, na.rm = T)) %>% 
+  bind_rows(hybas_predictions %>%
+              arrange(x_s) %>% 
+              slice_sample(n = 70000)) %>% 
+  # sample_n(80000) %>%
   ggplot(aes(x = x_s, y = y)) +
-  geom_point() +
-  geom_point(data = cont_s %>% filter(chemical == "se"),
-             aes(y = adult_conc_ng_mg_dm), color = 'red')
+  geom_line() +
+  geom_ribbon(aes(ymin = y_lower, ymax = y_upper), alpha = 0.2) +
+  geom_point(data = mod$data ,
+             aes(y = y_s*max_adult_conc,
+                 x = x_s), color = 'red') +
+  # scale_y_log10() +
+  NULL
 
-sum(se_hybas_predictions$chem_flux_mg_year)/1e06
-
-cont_s %>% filter(chemical == "se") %>% 
-  reframe(mean = median(adult_conc_ng_mg_dm))
+sum(hybas_predictions$chem_flux_mg_year_lower, na.rm = T)/1e06
+sum(hybas_predictions$chem_flux_mg_year, na.rm = T)/1e06
+sum(hybas_predictions$chem_flux_mg_year_upper, na.rm = T)/1e06
