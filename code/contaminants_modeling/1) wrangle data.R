@@ -7,8 +7,7 @@ library(scales)
 library(readxl)
 
 # 1) load data
-contaminants_raw_initial = read_excel("data/AquaSync-Contaminant_transfer-2024-2-21_JMK.xlsx", 
-                          sheet = "main_data_good_names") %>% 
+contaminants_raw_initial = read_csv("data/AquaSync-Contaminant_transfer-2024-2-21_JMK(main_data_good_names).csv") %>% 
   clean_names() %>% 
   ungroup %>% 
   mutate(row_id = row_number()) %>% 

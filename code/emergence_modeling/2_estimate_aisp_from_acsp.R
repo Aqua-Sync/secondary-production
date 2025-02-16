@@ -32,8 +32,8 @@ gratton_fi = read_excel("data/gratton_supplement_A.xlsx") %>%
 #                             prior = c(prior(normal(0.66, 0.07), class = "Intercept")))
 
 # saveRDS(brm_prop_insects_beta, file = "models/brm_prop_insects_beta.rds")
-brm_prop_insects_beta = update(readRDS(file = "models/brm_prop_insects_beta.rds"),
-                               newdata = dat_aispacsp)
+# brm_prop_insects_beta = update(readRDS(file = "models/brm_prop_insects_beta.rds"),
+#                                newdata = dat_aispacsp)
 # saveRDS(brm_prop_insects_beta, file = "models/brm_prop_insects_beta.rds")
 
 # 5) get posteriors of proportion of insects

@@ -8,6 +8,24 @@ library(scales)
 # load data
 contaminants = readRDS(file = "data/contaminants.rds")
 
+
+# table for Powell
+contaminants = readRDS(file = "data/contaminants.rds")
+
+cont_table = contaminants %>% 
+  filter(chemical_category %in% c("Se", "Pb", "Zn", "Hg", "Cu", "Cd",
+                                  "insecticide", "fungicide", "herbicide", 
+                                  "ECD", "pharmaceuticals")) %>% 
+  distinct(chemical_category, chemical) %>% 
+  mutate(chemical_category = str_to_sentence(chemical_category),
+         chemical = str_to_sentence(chemical)) %>% 
+  mutate(chemical_category = case_when(chemical_category %in% c("Cd", "Cu", "Pb", "Se", "Zn") ~ "Trace Metals",
+                                       TRUE ~ chemical_category)) %>% 
+  group_by(chemical_category) %>% 
+  summarize(chemicals = paste(chemical, collapse = ", "))
+
+write_csv(cont_table, file = "tables/cont_table.csv")
+
 # number of records per category
 contaminants_summary = contaminants %>% 
   pivot_longer(cols = c(water_conc_ug_l, sediment_conc_ug_g, adult_conc_ng_mg_dm)) %>% 
@@ -74,3 +92,10 @@ contaminants %>%
   scale_x_log10() +
   # scale_y_log10() +
   NULL
+
+
+contaminants %>% 
+  filter(chemical_category == "PUFA") %>% 
+  select(adult_conc_ng_mg_dm) %>% 
+  ggplot(aes(x = adult_conc_ng_mg_dm)) + 
+  geom_histogram()

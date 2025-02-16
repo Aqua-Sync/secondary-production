@@ -9,8 +9,6 @@ theme_set(theme_default())
 # load prefit models
 updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below
 
-updated_gams[[10]]$formula
-
 pp_data_list = list()
 
 for(i in 1:length(updated_gams)){
@@ -32,3 +30,7 @@ pp_data %>%
                      labels = c(expression(italic(y)), expression(italic(y)[rep]))) +
   theme(legend.title = element_blank()) +
   guides(alpha = "none") 
+
+
+
+

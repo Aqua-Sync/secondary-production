@@ -14,7 +14,12 @@ regions = tibble(region_name = c("Africa",
                             "North America",
                             "Arctic (North America)",
                             "Greenland"),
-                 region = c(1, 2, 3, 4, 5, 6, 7, 8, 9))
+                 region = as.character(c(1, 2, 3, 4, 5, 6, 7, 8, 9)))
+
+hybas_regions = bind_rows(data_to_predict_list) %>% left_join(regions) %>% 
+  select(HYBAS_ID, region_name)
+
+saveRDS(hybas_regions, file = "data/hybas_regions.rds")
 
 # load model predictions of each HYBAS_ID
 flux_predictions = readRDS(file = "posteriors/flux_predictions_all.rds") %>% 
