@@ -39,6 +39,7 @@ contaminants_unit_harmonized = contaminants_raw %>%
                            adult_units == "µg_g" ~ adult_conc_num*1,
                            adult_units == "mg_kg" ~ adult_conc_num*1,
                            adult_units == "mg_g" ~ adult_conc_num*1000,
+                           adult_units == "mg_g_dm" ~ adult_conc_num*1000,
                            adult_units == "ppm_dw" ~ adult_conc_num*1,
                            adult_units == "ng_g_dm" ~ adult_conc_num/1000,
                            TRUE ~ adult_conc_num)) %>% 
@@ -49,8 +50,6 @@ contaminants_unit_harmonized = contaminants_raw %>%
                                      sediment_units == "ngg" ~ sediment_conc_num/1000,
                                      TRUE ~ sediment_conc_num)) 
 
-
-contaminants_unit_harmonized %>% glimpse()
 
 saveRDS(contaminants_unit_harmonized, file = "data/contaminants.rds")
 

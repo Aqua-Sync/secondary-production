@@ -10,6 +10,10 @@ secondary_prod = read_csv(file = "data/secondary_prod.csv") %>%
 
 # Estimate insect secondary production from total community production --------------
 
+# number with only acsp
+secondary_prod %>% 
+  filter(is.na(aisp))
+
 # 2) calculate raw proportion
 dat_aispacsp = secondary_prod %>% 
   filter(!is.na(aisp)) %>% 

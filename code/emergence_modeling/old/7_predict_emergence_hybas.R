@@ -4,24 +4,28 @@ library(tidybayes)
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
 
 # load data
-data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
+emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
+data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split() # basin-level predictor variables by continent
 # load models
 updated_gams = readRDS("models/updated_gams.rds")
 
-max_emergence <- 26254.98
+max_emergence = max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
+
+hybas_area = readRDS("data/HYBAS_surface_area_REDIST.rds") # redistributed surface areas from Jakob. 
 
 # Loop through each object in data_to_predict_list
 for (i in 1:length(data_to_predict_list)) {
   tryCatch({
     # Generate predictions for each object
-    hybas_predictions = data_to_predict_list[[i]] %>%
+    hybas_predictions = data_to_predict_list[[i]] %>% 
       select(HYBAS_ID, precip_s, water_km2, pre_mm_syr) %>%
-      mutate(author_year = "new") %>%
+      mutate(author_year = "new") %>% 
+      left_join(hybas_area) %>%
       add_epred_draws(updated_gams[[1]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 1000) %>%
       mutate(mgdmm2y = .epred * max_emergence,
              kgdmm2y = mgdmm2y / 1e6,
              kgdmkm2y = kgdmm2y * 1e6) %>%
-      mutate(kgdmhybasyr = kgdmkm2y * water_km2) %>%
+      mutate(kgdmhybasyr = kgdmkm2y * area.redist) %>% # hybas water areas from hybas_area in km2
       ungroup() %>%
       select(HYBAS_ID, .draw, kgdmhybasyr)
     
