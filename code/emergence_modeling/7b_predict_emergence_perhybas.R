@@ -116,6 +116,9 @@ post_flux_all_peryear_hybas = bind_rows(post_flux_kgC_peryear_hybas,
 
 saveRDS(post_flux_all_peryear_hybas, file = "posteriors/post_flux_all_peryear_hybas.rds")
 
+post_flux_all_peryear_hybas = readRDS(file = "posteriors/post_flux_all_peryear_hybas.rds") 
+
+
 
 # plot --------------------------------------------------------------------
 
