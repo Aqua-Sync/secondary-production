@@ -48,7 +48,15 @@ contaminants_unit_harmonized = contaminants_raw %>%
                                          TRUE ~ water_conc_num)) %>% 
   mutate(sediment_conc_ug_g = case_when(sediment_units == "mgg" ~ sediment_conc_num*1000,
                                      sediment_units == "ngg" ~ sediment_conc_num/1000,
-                                     TRUE ~ sediment_conc_num)) 
+                                     TRUE ~ sediment_conc_num))%>% 
+  mutate(chemical_category = case_when(chemical_category == "legacy insecticide" ~ "insecticide",
+                                       chemical == "propyzamide" ~ "herbicide",
+                                       TRUE ~ chemical_category),
+         chemical = str_remove(chemical, " \\(sum of isomers\\)"),
+         chemical = case_when(chemical == "fluopicolid" ~ "fluopicolide",  # matching names in the data with official cas names
+                              chemical == "p,p'-ddd" ~ "p,p′-DDD",
+                              chemical == "primicarb" ~ "pirimicarb",
+                              TRUE ~ chemical)) 
 
 
 saveRDS(contaminants_unit_harmonized, file = "data/contaminants.rds")

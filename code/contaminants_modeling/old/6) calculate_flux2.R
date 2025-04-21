@@ -18,7 +18,8 @@ contaminants = readRDS(file = "data/contaminants.rds") %>%
 # load dry mass emergence predictions
 flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID)) 
+  mutate(HYBAS_ID = as.character(HYBAS_ID),
+         HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
 
 # contaminant cas numbers and names
 cas_names = readRDS(file = "data/cas_names.rds") %>% 
@@ -50,9 +51,12 @@ filtered_mod_list = Filter(function(m) m$data2$chemical %in% chemicals_we_have ,
 # 4) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
 hybas_predictions = lapply(filtered_mod_list, get_contaminant_preds) 
 
+saveRDS(hybas_predictions, file = "posteriors/hybas_predictions_global.rds")
+
+
 # 6) replace zeros with baseline values (only if contaminant is an essential element, otherwise, they remain as 0)
 library(data.table)
-source("code/custom_functions/get_baseline_values.r") # function to combine biomass and contaminant concentrations, then multiply to get posterior prediction of contaminant flux in each HYBAS
+source("code/custom_functions/get_baseline_values.r") # function to combine biomass and contaminant tissue concentrations, then multiply to get posterior prediction of contaminant flux in each HYBAS
 
 for(i in 1:length(hybas_predictions)){
   baselines = baseline_values %>% left_join(cas_names) %>% 

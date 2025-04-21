@@ -35,8 +35,6 @@ for(i in 1:length(cont_split)){
 
 saveRDS(mod_list, file = "models/mod_list.rds")
 
-
-
 # PUFA --------------------------------------------------------------------
 pufa_data = contaminants %>% filter(chemical_category == "PUFA") %>% 
   filter(adult_units == "mg_g_dm") %>% # original pufa data units are in mg_g_dm. they were convered to ng_mg_dm to be consistent with other contaminants. But the adult_units here refers to the correct "old" units.
