@@ -1,0 +1,28 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+2025-04-18:
+  Fixed miscoded insecticide "propyzamide", which was originally labeled as a fungicide and herbicide in our data.
+  Re-ran corresponding models in models/mod_list.rds and saved. 
+  Wrote code to estimates flux of herbicides, fungicides, and insecticides. That is contained in `6) calculate_insecticide_herbicide_flux_perhybas.R`
+  Ran the updated code to produce estimates of flux of the "-cides". 
+  
+2025-05-06:
+  Working with new predictions I noticed that the total amount of emergence is larger coming from Siberia than from South America. Siberia has ~half of the water area, but also has ~2X's higher predicted emergence perm2 per yr...the precipitation-emergence model "updated_gams[[1]]" has a hump-shaped relationship where emergence peaks at moderate precipitation and declines thereafter. That's fine, but the precipitation data that informs the model ranges from ~-2 to 4 (in standardized units). By comparison, the precipitation data for South America ranges from ~-2 to 17. As a result, when we predict emergence in South America many places have low predicted emergence (in units of mg/m2/y) because they have high precipitation. That is consistent with the fitted data, but is it reasonable for the predictions?
+  It should also be noted that the raw data from South America does suggest lower annual emergence compared to North and South America, so perhaps this is enough justification to leave it as is. 
+  
+I ran the precip model again with log10 transformed precip (and then z-scored), but the results were similar. That doesn't fix the problem. 
+
+Instead, using the model that has both temperature and precip yielded results that made more logical sense. The reason is probably b/c the temp model down weights emergence at low temperatures (and at extreme temperatures). Thus, the Siberian emergence result is smaller as we would expect, and Asia, South America are again some of the highest, also as we would expect given their tropical climates.
+
+2025-05-07: After meeting with AquaSync team, we will move forward with the temp*precip model. 
+2025-05-08: Using new estimates, I re-ran the code to calculate global contaminant flux. It ran well and compares reasonably with the previous result. The code itself produces a bunch of warnings like ℹ In argument:
+
+`kg_flux = sample_gamma(n = 1, mean = mean, sd = sd)`.
+`Caused by warning in `rgamma()`:`
+`! NAs produced`
+
+I looked into these warnings. They are harmless. They're caused by trying to sample from basins that have zero contaminants and hence a zero standard deviation, so that sample_gamma(n = 1, mean = 0, sd = 0) causes and error.
+
