@@ -58,14 +58,14 @@ source("code/custom_functions/get_global_contaminant_cides_preds.r") # function 
 mod_list_ides = Filter(function(model) model$data2$chemical_category %in% c("fungicide", "herbicide", "insecticide"), mod_list)
 
 # 3) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
-global_cides_predictions = lapply(mod_list_ides, get_global_contaminant_cides_preds) 
+global_predictions_pest_herb_fungicide = lapply(mod_list_ides, get_global_contaminant_cides_preds) 
 
-saveRDS(global_cides_predictions, file = "posteriors/global_cides_predictions.rds")
+saveRDS(global_predictions_pest_herb_fungicide, file = "posteriors/global_predictions_pest_herb_fungicide.rds")
 
 # summarize ---------------------------------------------------------------
-global_cides_predictions = readRDS(file = "posteriors/global_cides_predictions.rds")
+global_predictions_pest_herb_fungicide = readRDS(file = "posteriors/global_predictions_pest_herb_fungicide.rds")
 
 # Global Annual Metric Tons
-bind_rows(global_cides_predictions) %>% 
+bind_rows(global_predictions_pest_herb_fungicide) %>% 
   group_by(chemical) %>% 
   median_qi(global_flux_MT_peryr)

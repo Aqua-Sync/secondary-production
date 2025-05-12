@@ -16,7 +16,7 @@ contaminants = readRDS(file = "data/contaminants.rds") %>%
   ))
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
+flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
          HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
@@ -30,7 +30,7 @@ cas_names = readRDS(file = "data/cas_names.rds") %>%
                                       chemical == "Copper" ~ "Cu",
                                       chemical == "Cadmium" ~ "Cd"
                                       ))
-# Wolfram predictions of contaminants. Generated in wrangl_modeled_water.R. It uses water concentrations from Jakob Wolfram on seafile.rlp.net...then reformats.
+# Wolfram predictions of contaminants. Generated in wrangle_modeled_water.R. It uses water concentrations from Jakob Wolfram on seafile.rlp.net...then reformats.
 modeled_water = readRDS(file = "data/modeled_water.rds") # values have been corrected for minimums with essential elements (i.e., if water concentrations indicate zero Se but still has emergence, then we need to assign a minimum amount to flux b/c flux of Se in tissues can't also be zero)
 
 # Models that predict contaminant tissue concentrations as a function of water concentrations. Different models per contaminant.
@@ -49,15 +49,15 @@ chemicals_we_have = cas_names %>% filter(!is.na(chemical_category)) %>%
 filtered_mod_list = Filter(function(m) m$data2$chemical %in% chemicals_we_have , mod_list)
 
 # 4) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
-global_predictions = lapply(filtered_mod_list, get_global_contaminant_preds) 
+global_predictions_metals = lapply(filtered_mod_list, get_global_contaminant_preds) 
 
-saveRDS(global_predictions, file = "posteriors/global_predictions.rds")
+saveRDS(global_predictions_metals, file = "posteriors/global_predictions_metals.rds")
 
 # summarize ---------------------------------------------------------------
-global_predictions = readRDS(file = "posteriors/global_predictions.rds")
+global_predictions_metals = readRDS(file = "posteriors/global_predictions_metals.rds")
 
 # Global Annual Metric Tons
-bind_rows(global_predictions) %>% 
+bind_rows(global_predictions_metals) %>% 
   group_by(chemical) %>% 
   median_qi(global_flux_MT_peryr)
 

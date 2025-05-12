@@ -12,7 +12,7 @@ contaminants_ides = readRDS(file = "data/contaminants.rds") %>%
 unique(contaminants_ides$chemical)
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
+flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
          HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
@@ -60,7 +60,9 @@ mod_list_ides = Filter(function(model) model$data2$chemical_category %in% c("fun
 # 3) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
 hybas_predictions_ides = lapply(mod_list_ides, get_hybas_cide_preds) 
 
-saveRDS(hybas_predictions_ides, file = "posteriors/hybas_predictions_ides.rds")
+hybas_predictions_ides_df = bind_rows(hybas_predictions_ides)
+
+saveRDS(hybas_predictions_ides_df, file = "posteriors/hybas_predictions_pest_herb_fungicide.rds")
 
 # summarize ---------------------------------------------------------------
 hybas_predictions_ides = readRDS(file = "posteriors/hybas_predictions_ides.rds")

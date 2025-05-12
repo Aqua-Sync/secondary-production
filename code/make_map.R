@@ -15,13 +15,15 @@ world <- map_data("world")
 #make a map
 ( map_bugs <- ggplot() + 
     geom_polygon(data = world, 
-                 aes(x = long, y = lat, group = group)) +  #fill is the land color
+                 aes(x = long, y = lat, group = group),
+                 alpha = 0.4) +  #fill is the land color
     coord_quickmap() +
     geom_point(data = dat_bugs, aes(x = lon, y = lat, size = emerge_1, 
-                               color = tmp_dc_syr)) + 
+                               fill = tmp_dc_syr),
+               color = "black", shape = 21) + 
     theme_void()  + 
     guides(fill = "none", color = "none", size = "none") +
-    scale_color_viridis() +
+    scale_fill_viridis() +
     NULL)
 
 map_bugs

@@ -16,7 +16,7 @@ contaminants = readRDS(file = "data/contaminants.rds") %>%
   ))
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
+flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
          HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
@@ -49,16 +49,12 @@ chemicals_we_have = cas_names %>% filter(!is.na(chemical_category)) %>%
 filtered_mod_list = Filter(function(m) m$data2$chemical %in% chemicals_we_have , mod_list)
 
 # 4) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
-hybas_predictions = lapply(filtered_mod_list, get_hybas_contaminant_preds) 
+hybas_contaminant_predictions = lapply(filtered_mod_list, get_hybas_contaminant_preds) 
 
 saveRDS(hybas_predictions, file = "posteriors/hybas_predictions.rds")
 
-# summarize ---------------------------------------------------------------
-hybas_predictions = readRDS(file = "posteriors/hybas_predictions.rds")
+hybas_contaminant_predictions = bind_rows(hybas_predictions) %>% 
+  select(HYBAS_ID, cas, element, starts_with("chem_flux_mg")) %>% 
+  mutate(description = "mg flux per hybas_id via emergence")
 
-# Global Annual Metric Tons
-bind_rows(hybas_predictions) %>% 
-  group_by(chemical) %>% 
-  median_qi(global_flux_MT_peryr)
-
-
+saveRDS(hybas_contaminant_predictions, file = "posteriors/hybas_predictions_metals.rds")

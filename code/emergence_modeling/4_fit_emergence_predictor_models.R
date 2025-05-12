@@ -20,6 +20,7 @@ emergence_production = read_csv(file = "data/emergence_production.csv") %>%
   mutate(tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C
          pre_cm_syr1000 = pre_mm_syr/1000,
          precip_s = scale(pre_mm_syr),
+         log10_precip_s = scale(log10(pre_mm_syr)), # don't need to use this predictor. See "Notes on contaminant modeling.RMD"
          ele_mt_sav_s = scale(ele_mt_sav),
          logdis_m3_pyr_s = scale(log(dis_m3_pyr + 0.05)),
          for_pc_sse_s = scale(for_pc_sse),
@@ -38,6 +39,15 @@ emergence_production_with_vars = emergence_production %>%
   mutate(HYBAS_ID = hybas_id) 
 
 saveRDS(emergence_production_with_vars, file = 'data/emergence_production_with_vars.rds')
+
+mean_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:center`
+sd_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:scale`
+
+# data_to_predict = readRDS("data/data_to_predict.rds") %>% 
+#   mutate(stream_temp = tmp_dc_syr/10,
+#          stream_temp_s = (stream_temp - mean_temp)/sd_temp) 
+# 
+# saveRDS(data_to_predict, file = "data/data_to_predict.rds")
 
 # load prefit models
 updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below

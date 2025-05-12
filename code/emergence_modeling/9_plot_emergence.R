@@ -23,16 +23,19 @@ saveRDS(hybas_regions, file = "data/hybas_regions.rds")
 
 # load model predictions of each HYBAS_ID
 flux_predictions = readRDS(file = "posteriors/flux_predictions_all.rds") %>% 
-  mutate(region = as.numeric(str_sub(HYBAS_ID, 1, 1))) %>% left_join(regions)
+  mutate(region = as.character(str_sub(HYBAS_ID, 1, 1))) %>% left_join(regions)
 
 write_csv(flux_predictions, file = "posteriors/flux_predictions.csv")
 
 # load posterior of global and regional total flux
 flux_global = readRDS(file = "posteriors/flux_global.rds") %>% mutate(region_name = "Earth", 
                                                                       global = "Earth")
-flux_region = readRDS(file = "posteriors/flux_region.rds") %>% mutate(global = "Regional") %>% left_join(regions)
+flux_region = readRDS(file = "posteriors/flux_region.rds") %>% mutate(global = "Regional",
+                                                                      region = as.character(region)) %>% left_join(regions)
 
 flux_region_global = bind_rows(flux_region, flux_global)
+
+saveRDS(flux_region_global, file = "posteriors/flux_region_global.rds")
 
 # plot --------------------------------------------------------------------
 

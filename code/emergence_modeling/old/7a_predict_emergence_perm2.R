@@ -7,16 +7,14 @@ emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence <- max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
 
-mod = updated_gams[[3]]
-mod_dat = mod$data
+
+mod_dat = updated_gams[[1]]$data
 
 # estimate mass, C, N, P. N and P come from Elser et al. 2000 C:N 6.3 and C:P 124 FOR ADULT INSECTS -----------------
-set.seed(20202)
 post_mass_nutrients = mod_dat %>% 
-  select(-emerge_1, -HYBAS_ID) %>% 
-  distinct() %>%
+  distinct(precip_s) %>%
   mutate(HYBAS_ID = "new") %>% 
-  add_epred_draws(mod, re_formula = NULL, allow_new_levels = T) %>% 
+  add_epred_draws(updated_gams[[1]], re_formula = NULL, allow_new_levels = T) %>% 
   mutate(.epred = .epred*max_emergence) %>% 
   group_by(.draw) %>% 
   reframe(mean_mgDMm2y = mean(.epred))  %>% 
@@ -32,7 +30,6 @@ pufa_data = readRDS("data/pufa_data.rds")
 
 unique(pufa_data$adult_units)
 
-set.seed(20202)
 post_pufa = tibble(pub_name = "new") %>% 
   add_epred_draws(pufa_mod, allow_new_levels = T) %>% 
   mutate(.epred = .epred*unique(pufa_data$max_y),
