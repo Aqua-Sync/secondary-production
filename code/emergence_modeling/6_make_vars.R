@@ -32,6 +32,18 @@ library(foreign)
 
 hydrobasin_vars_rssa_short = readRDS(file = "data/hydrobasin_vars_rssa_short.rds")
 
+emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
+
+data_to_predict = hydrobasin_vars_rssa_short %>% 
+  as_tibble() %>% 
+  mutate(precip_mm_perkm2 = pre_mm_syr/SUB_AREA,
+         precip_s = (precip_mm_perkm2 - attributes(emergence_production_with_vars$precip_s)[[2]])/attributes(emergence_production_with_vars$precip_s)[[3]],
+         tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C
+         stream_temp = estimate_streamtemp(tmp_dc_syr10),
+         stream_temp_s = (stream_temp - attributes(emergence_production_with_vars$stream_temp_s)[[2]])/attributes(emergence_production_with_vars$stream_temp_s)[[3]]) 
+
+# saveRDS(data_to_predict, file = "data/data_to_predict.rds")
+
 hydrobasin_vars_rssa_short %>% select(BAS_ID, HYBAS_ID, BA_km2, SUB_AREA, mnRSSA_pc) %>% 
   group_by(BAS_ID) %>% 
   mutate(water_km2 = SUB_AREA*(mnRSSA_pc/100)) %>% 

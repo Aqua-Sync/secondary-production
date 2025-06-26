@@ -13,3 +13,15 @@ write_csv(post_emergence_perm2, file = "posteriors/post_DM_CNP_PUFA_perm2.csv")
 write_csv(post_mass_nutrients_pufa_global, file = "posteriors/post_DM_CNP_PUFA_peryear_global.csv")
 
 
+
+flux_per_region = dm2 %>% 
+  group_by(region_name) %>% 
+  add_tally() %>% 
+  group_by(region_name, n) %>% 
+  reframe(median_kgdm_peryear = median(median),
+          mean_kgdm_peryear = mean(median)) %>% 
+  arrange(median_kgdm_peryear) %>% 
+  rename(n_basins = n)
+
+
+write_csv(flux_per_region, file = "tables/flux_per_region.csv")

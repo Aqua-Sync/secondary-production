@@ -8,7 +8,7 @@ theme_set(theme_default())
 # Get ranges of aqueous contaminant concentrations globally and compare to the
 # range of contaminants in the HYBAS for which we have emergence measured. This 
 # provides a glimpse of the amount of mortality-driven contaminant effects that might
-# already be accounte for in our estimates of emergence.
+# already be accounted for in our estimates of emergence.
 
 cas_names = readRDS("C:/Users/jeff.wesner/OneDrive - The University of South Dakota/USD/Github Projects/secondary-production/data/cas_names.rds")
 modeled_water = as_tibble(readRDS(file = "data/modeled_water.rds")) %>% # values have been corrected for minimums with essential elements (i.e., if water concentrations indicate zero Se but still has emergence, then we need to assign a minimum amount to flux b/c flux of Se in tissues can't also be zero)
