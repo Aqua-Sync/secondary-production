@@ -6,7 +6,11 @@ library(tidybayes)
 # 1) load data and models -------------------------------------------------
 # load data
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
-data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split() # basin-level predictor variables by continent
+data_to_predict_list = readRDS("data/data_to_predict.rds") %>% 
+  filter(SUB_AREA > 0) %>%
+  mutate(precip_mm_perkm2 = pre_mm_syr/SUB_AREA,
+         precip_s = (precip_mm_perkm2 - attributes(emergence_production_with_vars$precip_s)[[2]])/attributes(emergence_production_with_vars$precip_s)[[3]]) %>% 
+  group_by(region) %>% group_split() # basin-level predictor variables by continent
 hybas_regions <- readRDS("data/hybas_regions.rds")
 post_pufa = readRDS(file = "posteriors/post_pufa.rds")
 
@@ -71,7 +75,7 @@ for(i in seq_along(data_to_predict_list)) {
     ) %>%
     mutate(units = "mgPUFAm2")
 }
-# 
+
 saveRDS(post_pufa_hybas_summary, file = "posteriors/post_pufa_hybas_summary.rds")
 
 post_summary = readRDS(file = "posteriors/post_summary.rds")
@@ -91,6 +95,8 @@ post_flux_kgdm_perm2year_hybas = bind_rows(post_summary) %>%
   left_join(hybas_regions) %>% 
   group_by(region_name) %>% 
   mutate(median_region = median(median))
+
+saveRDS(post_flux_kgdm_perm2year_hybas, file = "posteriors/post_flux_kgdm_perm2_perhybas.rds")
 
 post_flux_kgdm_peryear_hybas = bind_rows(post_summary) %>% 
   pivot_longer(cols = c(-HYBAS_ID, -precip_s, -stream_temp_s)) %>% 
@@ -128,11 +134,23 @@ hybas_predictions_mass_nutrients = bind_rows(post_flux_kgC_peryear_hybas,
                                         post_flux_kgdm_peryear_hybas,
                                         post_flux_kgN_peryear_hybas,
                                         post_flux_kgP_peryear_hybas,
-                                        post_flux_kgPUFA_peryear_hybas)
+                                        post_flux_kgPUFA_peryear_hybas) %>% 
+  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
+              select(HYBAS_ID, SUB_AREA))
 
 saveRDS(hybas_predictions_mass_nutrients, file = "posteriors/hybas_predictions_mass_nutrients.rds")
 
 hybas_predictions_mass_nutrients = readRDS(file = "posteriors/hybas_predictions_mass_nutrients.rds") 
+
+# split and save by separate elements
+
+split_data = split(hybas_predictions_mass_nutrients, hybas_predictions_mass_nutrients$units)
+
+# Save each split tibble as an .rds file
+lapply(names(split_data), function(unit) {
+  filename <- paste0("posteriors/hybas_predictions_", unit, ".rds")
+  saveRDS(split_data[[unit]], file = filename)
+})
 
 
 # plot --------------------------------------------------------------------

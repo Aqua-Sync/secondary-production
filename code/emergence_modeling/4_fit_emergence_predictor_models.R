@@ -19,7 +19,9 @@ emergence_production = read_csv(file = "data/emergence_production.csv") %>%
   mutate(author_year = paste(author, year, sep = "_")) %>% glimpse %>% 
   mutate(tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C
          pre_cm_syr1000 = pre_mm_syr/1000,
-         precip_s = scale(pre_mm_syr),
+         # precip_s = scale(pre_mm_syr),
+         precip_mm_perkm2 = pre_mm_syr/sub_area,
+         precip_s = scale(precip_mm_perkm2),
          log10_precip_s = scale(log10(pre_mm_syr)), # don't need to use this predictor. See "Notes on contaminant modeling.RMD"
          ele_mt_sav_s = scale(ele_mt_sav),
          logdis_m3_pyr_s = scale(log(dis_m3_pyr + 0.05)),

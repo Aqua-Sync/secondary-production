@@ -16,10 +16,13 @@ contaminants = readRDS(file = "data/contaminants.rds") %>%
   ))
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
+flux_predictions_all = readRDS(file = "posteriors/hybas_predictions_mass_nutrients.rds") %>%
+  filter(grepl("kgdm", units)) %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID),
-         HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
+  left_join(readRDS("data/HYBAS_surface_area_REDIST.rds") %>% 
+              mutate(HYBAS_ID = as.numeric(HYBAS_ID))) %>% 
+  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
+              select(HYBAS_ID, BA_km2)) 
 
 # contaminant cas numbers and names
 cas_names = readRDS(file = "data/cas_names.rds") %>% 
@@ -41,26 +44,33 @@ quantile(10^modeled_zinc$max.conc.year)
 
 flux_predictions_zinc = flux_predictions_all %>% 
   left_join(modeled_zinc) %>% 
-  mutate(raw_ug_l = 10^mean.conc.year)
-
+  mutate(raw_ug_l_max = 10^(max.conc.year * mean.det.year),
+         raw_ug_l_mean = 10^(mean.conc.year * mean.det.year)) %>% 
+  pivot_longer(cols = starts_with("raw_ug"))
 
 zinc_distribution = flux_predictions_zinc %>% 
-  ggplot(aes(x = raw_ug_l)) + 
-  geom_histogram(bins = 100) +
-  xlim(0, 50) +
+  ggplot(aes(x = value + 1)) + 
+  geom_histogram(bins = 100, aes(color = name)) +
+  # facet_wrap(~name) +
+  geom_vline(aes(xintercept = 120), linetype = "dashed") +
+  annotate(geom = "text", x = 370, y = 750000,
+           label = "EPA Aquatic Life Criterion",
+           size = 3) +
   theme_default() +
   labs(y = "Number of sub-basins", 
        x = "ug/l Zinc",
-       subtitle = "Distribution of mean aqueous Zinc concentrations across 1,034,083 sub-basins") +
+       color = "",
+       subtitle = "Distribution of max and mean aqueous Zinc concentrations across 1,034,083 sub-basins") +
   theme(text = element_text(size = 10))
 
-ggsave(zinc_distribution, file = "plots/zinc_distribution.jpg", width = 6.5, height = 6.5)
+ggsave(zinc_distribution, file = "plots/zinc_distribution.jpg", 
+       width = 6.5, height = 6.5)
 
 
 quantile(flux_predictions_zinc$mean.conc.year, na.rm = T)
 
 a = flux_predictions_zinc %>% 
-  filter(raw_ug_l >= 50) %>%
+  filter(raw_ug_l >= 100) %>%
   # filter(mean.conc.year >= 1.219) %>% 
   mutate(mean_adjusted = 0.03*mean,
          mortality_effect = "yes")
@@ -76,9 +86,7 @@ sum(ab$mean)/1e9
 sum(ab$mean_adjusted)/1e9
 
 
-
-
-left_join(flux_predictions_zinc%>% 
+left_join(flux_predictions_zinc %>% 
             mutate(mortality_effect = "no"),
           a %>% select(HYBAS_ID, mean_adjusted)) %>% 
   mutate(raw_ug_l = 10^mean.conc.year) %>% 
@@ -86,7 +94,7 @@ left_join(flux_predictions_zinc%>%
   ggplot(aes(x = raw_ug_l, y = mean, color = "not adjusted")) +
   geom_point() +
   geom_point(aes(y = mean_adjusted, color = "adjusted")) +
-  # scale_y_log10() + 
+  scale_y_log10() +
   scale_x_log10() +
   NULL
 
@@ -145,8 +153,8 @@ modeled_cd = modeled_water %>% filter(cas == cas_keep %>% filter(chemical == "Ca
   mutate(cd = mean.conc.year)
 
 
-modeled_znpbcd = left_join(modeled_zn, modeled_pb %>% select(HYBAS_L12, pb)) %>% 
-  left_join(modeled_cd %>% select(HYBAS_L12, cd))
+modeled_znpbcd = left_join(modeled_zn, modeled_pb %>% select(HYBAS_ID, pb)) %>% 
+  left_join(modeled_cd %>% select(HYBAS_ID, cd))
 
 theme_set(brms::theme_default())
 
@@ -186,8 +194,7 @@ metal_pairs = pa + pb + pc
 ggsave(metal_pairs, file = "plots/metal_pairs.jpg", width = 6.5, height = 3)
 
 
-
-flux_with_metals = flux_predictions_all %>% left_join(modeled_znpbcd %>% select(HYBAS_L12, zn, pb, cd))
+flux_with_metals = flux_predictions_all %>% left_join(modeled_znpbcd %>% select(HYBAS_ID, zn, pb, cd))
 
 metal_regress1 = flux_with_metals %>% 
   sample_n(30000) %>% 

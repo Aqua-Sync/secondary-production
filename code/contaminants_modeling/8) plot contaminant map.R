@@ -24,14 +24,17 @@ library(maps)
 hybas_contaminant_predictions = readRDS(file = "posteriors/hybas_contaminant_predictions.rds") %>% 
   left_join(readRDS(file = "data/hybas_regions.rds") %>% mutate(HYBAS_ID = as.character(HYBAS_ID)))
 
-
 #2) plot
 
-hybas_contaminant_predictions %>% 
-  group_by(element) %>% 
-  sample_n(10000) %>% 
-  filter(element == "Zn") %>% 
-  ggplot(aes(x = lon, y = lat, color = log10(chem_flux_mg_year + 1))) +
+hybas_predictions_mgperyear_Pb %>% 
+  left_join(readRDS(file = "data/hybas_regions.rds") %>% mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
+  group_by(element) %>%
+  filter(lat < 0) %>% 
+  filter(lon < -30) %>%  
+  # sample_n(10000) %>% 
+  ggplot(aes(x = lon, y = lat, color = chem_flux_mg_year)) +
   geom_point(shape = 20, size = 0.01) +
   facet_wrap(~element) +
-  scale_color_viridis()
+  scale_color_distiller(palette = "Greens", direction = 1,
+                        trans = "log10") +
+  NULL

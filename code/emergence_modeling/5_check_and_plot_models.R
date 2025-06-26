@@ -19,18 +19,41 @@ pp_data_list[[i]] = pp_check(updated_gams[[i]])$data %>%
 
 pp_data = bind_rows(pp_data_list)
 
-pp_data %>% 
+emergence_model_checks = pp_data %>% 
   ggplot(aes(x = value, group = rep_id, color = is_y_label)) + 
-  # geom_density(aes(alpha = is_y_label)) +
-  stat_slab(fill = NA, aes(alpha = is_y_label), linewidth = 0.2) +
+  geom_density(aes(alpha = is_y_label)) +
+  # stat_slab(fill = NA, aes(alpha = is_y_label), linewidth = 0.2) +
   facet_wrap(~model_number) +
-  scale_x_log10() +
+  scale_x_log10(labels = scales::comma) +
   scale_alpha_manual(values = c(1, 0.2)) +
   scale_color_manual(values = c("black", "dodgerblue"),
-                     labels = c(expression(italic(y)), expression(italic(y)[rep]))) +
-  theme(legend.title = element_blank()) +
-  guides(alpha = "none") 
+                     labels = c(expression(italic(y)), 
+                                expression(italic(y)[rep]))) +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(size = 6),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank()) +
+  labs(x = "Insect Emergence (mgDM/m2) [scaled to maximum]") +
+  guides(alpha = "none")
 
+ggsave(emergence_model_checks, file = "plots/emergence_model_checks.jpg",
+       width = 6.5, height = 6, dpi = 500)
+
+
+
+# model list --------------------------------------------------------------
+
+model_list = list()
+
+for(i in 1:length(updated_gams)){
+  model_list[[i]] = tibble(model_number = i,
+                           formula = as.character(updated_gams[[i]]$formula)[1])
+}
+
+model_table = bind_rows(model_list)
+
+write_csv(model_table, file = "tables/model_table.csv")
 
 # plot models -------------------------------------------------------------
 theme_set(theme_default())

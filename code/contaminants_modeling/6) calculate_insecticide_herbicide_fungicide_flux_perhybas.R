@@ -12,7 +12,8 @@ contaminants_ides = readRDS(file = "data/contaminants.rds") %>%
 unique(contaminants_ides$chemical)
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
+flux_predictions_all = readRDS("posteriors/hybas_predictions_mass_nutrients.rds") %>% 
+  filter(units == "kgdm_peryear") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
          HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
@@ -39,7 +40,7 @@ modeled_water_ides = readRDS(file = "data/modeled_water.rds") %>%  # values have
 # combined modeled water ides so that we have mean concentrations of insecticides, fungicides, or herbicides. We need to 
 # do this b/c that is what our models of tissue concentrations are based off of (i.e., any concentration of fungicide, not particular types of fungicide)
 modeled_water_ides_mean = modeled_water_ides %>% left_join(ides_wehave %>% distinct(cas, chemical_category)) %>% 
-  group_by(HYBAS_L12, chemical_category) %>% 
+  group_by(HYBAS_ID, chemical_category) %>% 
   reframe(mean.conc.year = mean(mean.conc.year, na.rm = T),
           mean.det.year = mean(mean.det.year, na.rm = T),
           max.conc.year = max(max.conc.year, na.rm = T))
@@ -60,9 +61,26 @@ mod_list_ides = Filter(function(model) model$data2$chemical_category %in% c("fun
 # 3) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
 hybas_predictions_ides = lapply(mod_list_ides, get_hybas_cide_preds) 
 
-hybas_predictions_ides_df = bind_rows(hybas_predictions_ides)
+hybas_predictions_ides_df = bind_rows(hybas_predictions_ides) %>% 
+  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
+              select(HYBAS_ID, SUB_AREA) %>% 
+              mutate(HYBAS_ID = as.character(HYBAS_ID)))
 
 saveRDS(hybas_predictions_ides_df, file = "posteriors/hybas_predictions_pest_herb_fungicide.rds")
+
+rm(modeled_water)
+
+# split and save by separate elements
+
+hybas_predictions_ides_df = readRDS(file = "posteriors/hybas_predictions_pest_herb_fungicide.rds") 
+
+split_data_ides = split(hybas_predictions_ides_df, hybas_predictions_ides_df$element)
+
+# Save each split tibble as an .rds file
+lapply(names(split_data_ides), function(element) {
+  filename <- paste0("posteriors/hybas_predictions_mgperyear_", element, ".rds")
+  saveRDS(split_data_ides[[element]], file = filename)
+})
 
 # summarize ---------------------------------------------------------------
 hybas_predictions_ides = readRDS(file = "posteriors/hybas_predictions_ides.rds")

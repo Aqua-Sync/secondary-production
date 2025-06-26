@@ -7,46 +7,62 @@ emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence <- max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
 
-mod_dat = updated_gams[[1]]$data
+d = emergence_production_with_vars
+mod_dat = updated_gams[[3]]$data %>% 
+  mutate(precip_raw = (precip_s*attributes(d$precip_s)[[3]]) + attributes(d$precip_s)[[2]]) %>% 
+  mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) 
 
 # plot emergence conditional
 precip_emergence_plot = tibble(precip_s = seq(min(mod_dat$precip_s),
                       max(mod_dat$precip_s),
                       length.out = 30)) %>% 
-  mutate(HYBAS_ID = "new") %>% 
-  add_epred_draws(updated_gams[[1]], re_formula = NULL, allow_new_levels = T) %>% 
-  ggplot(aes(x = precip_s, y = .epred*max_emergence)) +
+  mutate(HYBAS_ID = "new",
+         stream_temp_s = 0) %>% 
+  mutate(precip_raw = (precip_s*attributes(d$precip_s)[[3]]) + attributes(d$precip_s)[[2]]) %>% 
+  add_epred_draws(updated_gams[[3]], re_formula = NULL, allow_new_levels = T) %>% 
+  ggplot(aes(x = precip_raw, y = (.epred*max_emergence)/1000)) +
   stat_lineribbon(alpha = 0.4) +
-  geom_point(data = mod_dat, aes(y = emerge_1*max_emergence),
+  geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000),
              size = 0.5) +
+  scale_fill_brewer(palette = "Greens") +
   # guides(fill = "none") +
-  labs(y = "Annual Emergence Production (mgDMm2y)",
-       x = "Annual Precipitation (z-score)",
-       subtitle = "Our nonlinear model - Precipitation")
+  labs(y = "Annual Emergence Production (gDMm2y)",
+       x = "Annual Precipitation (mm/km2/yr)",
+       fill = "Uncertainty\nInterval") 
 
-temp_dat = updated_gams[[2]]$data
+temp_dat = updated_gams[[3]]$data%>% 
+  mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) 
+
 temp_emergence_plot = tibble(stream_temp_s = seq(min(temp_dat$stream_temp_s),
                                               max(temp_dat$stream_temp_s),
                                               length.out = 30)) %>% 
-  mutate(HYBAS_ID = "new") %>% 
+  mutate(HYBAS_ID = "new",
+         precip_s = 0) %>% 
+  mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) %>% 
   add_epred_draws(updated_gams[[2]], re_formula = NULL, allow_new_levels = T) %>% 
-  ggplot(aes(x = stream_temp_s, y = .epred*max_emergence)) +
+  ggplot(aes(x = stream_temp, y = (.epred*max_emergence)/1000)) +
   stat_lineribbon(alpha = 0.4) +
-  geom_point(data = temp_dat, aes(y = emerge_1*max_emergence),
+  geom_point(data = temp_dat, aes(y = (emerge_1*max_emergence)/1000),
              size = 0.5) +
+  scale_fill_brewer(palette = "Greens") +
   # guides(fill = "none") +
-  labs(y = "Annual Emergence Production (mgDMm2y)",
-       x = "Mean Annual Temperature (z-score)",
-       subtitle = "b) Our nonlinear model - Temperature")
+  labs(y = "Annual Emergence Production (gDMm2y)",
+       x = "Mean Annual Temperature (\u00b0C)",
+       fill = "Uncertainty\nInterval")
 
 
 library(patchwork)
 
+emergence_two_plots = precip_emergence_plot/temp_emergence_plot + plot_layout(axis_titles = "collect",
+                                                                              guides = "collect")
+
+ggsave(emergence_two_plots, file = "plots/emergence_two_plots.jpg", width = 6, height = 6)
+
 
 patrick_plot = ggplot(data = temp_dat, aes(x = stream_temp_s)) +
-  geom_point(data = temp_dat, aes(y = emerge_1*max_emergence),
+  geom_point(data = temp_dat, aes(y = (emerge_1*max_emergence)/1000),
              size = 0.5) +
-  geom_smooth(method = lm, aes(y = emerge_1*max_emergence)) +
+  geom_smooth(method = lm, aes(y = (emerge_1*max_emergence)/1000)) +
   # guides(fill = "none") +
   labs(y = "Annual Emergence Production (mgDMm2y)",
        x = "Mean Annual Temperature (z-score)",

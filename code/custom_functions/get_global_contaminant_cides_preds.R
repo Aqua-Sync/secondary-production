@@ -13,7 +13,8 @@ get_global_contaminant_cides_preds <- function(mod, num_iterations = 300) {
   water_predictions <- modeled_water %>% 
     filter(chemical_category == mod$data2$chemical_category) %>% 
     mutate(chemical = unique(mod$data2$chemical_category),
-           HYBAS_ID = bit64::as.character.integer64(HYBAS_L12),
+           # HYBAS_ID = bit64::as.character.integer64(HYBAS_L12),
+           HYBAS_ID = as.character(HYBAS_ID),
            mean.conc.year.units = "log10_ug_l")
   
   # Pre-calculate values that are constant for all rows
@@ -34,12 +35,12 @@ get_global_contaminant_cides_preds <- function(mod, num_iterations = 300) {
         x_s = (log(water_ug_l_raw) - mean_x) / sd_x,
         y_mg_kg = max_adult_conc * exp(post_samples$b_Intercept[i] + post_samples$b_x_s[i] * x_s)
       ) %>% 
-      select(HYBAS_L12, y_mg_kg)
+      select(HYBAS_ID, y_mg_kg)
   }
   
   # Prepare kg_flux data
   kg_flux <- flux_predictions_all %>% 
-    select(HYBAS_L12, mean, sd) %>% 
+    select(HYBAS_ID, mean, sd) %>% 
     ungroup() %>% 
     mutate(kg_flux = sample_gamma(n = 1, mean = mean, sd = sd))
   
@@ -49,7 +50,7 @@ get_global_contaminant_cides_preds <- function(mod, num_iterations = 300) {
   # Calculate sum_mg for each y_mg_kg
   for (i in 1:length(y_mg_kg)) {
     sum_mg[[i]] <- y_mg_kg[[i]] %>% 
-      left_join(kg_flux %>% filter(mean > 0), by = "HYBAS_L12") %>% 
+      left_join(kg_flux %>% filter(mean > 0), by = "HYBAS_ID") %>% 
       filter(!is.na(mean)) %>% 
       mutate(chem_flux_mg_year = kg_flux * y_mg_kg) %>% 
       ungroup() %>% 

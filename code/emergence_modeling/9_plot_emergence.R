@@ -90,3 +90,95 @@ ggsave(flux_global_plot, file = "plots/flux_global_plot.jpg", width = 6, height 
 
 flux_global %>% 
   median_qi(kgyr_global)
+
+
+
+# compare to salmon via Brandt et al -------------------------------------------------
+
+library(tidyverse)
+library(tidybayes)
+library(janitor)
+library(ggrepel)
+library(scales)
+library(viridis)
+
+brandt_fig1_data = read_csv("C:/Users/jeff.wesner/OneDrive - The University of South Dakota/USD/Github Projects/salmon_nutrients_contaminants/plots/fig_1c_data.csv") %>% 
+  clean_names() %>% 
+  # add_row(species = "Insects",          # don't include. These are scaled to earth, but the Huang paper mentions that East China is "16x's" higher flux than Britain. So we'd need to account for spatial variation for these global fluxes to make any sense.
+  #         ecosystem = "Global Bioflows",
+  #         mechanism = "Aerial Bioflows",
+  #         n_flux_annualkg = 7.05e+8,
+  #         p_flux_annualkg = 70500000,
+  #         source = "Huang et al. 2024 PNAS (our estimate)")%>% 
+  add_row(species = "Insects",
+          ecosystem = "East China Bioflows",
+          mechanism = "Aerial Bioflows",
+          n_flux_annualkg = 1500000,
+          p_flux_annualkg = 150000,
+          source = "Huang et al. 2024 PNAS") 
+
+
+post_total_all = readRDS(file = "posteriors/post_total_all.rds")
+
+aquasync_np = post_total_all %>% 
+  group_by(units, chemical) %>% 
+  median_qi(flux) %>% 
+  filter(chemical %in% c("N", "P")) %>% 
+  select(chemical, flux) %>% 
+  pivot_wider(names_from = chemical, values_from = flux) %>% 
+  rename(n_flux_annualkg = N,
+         p_flux_annualkg = P) %>% 
+  mutate(source = "AquaSync",
+         species = "Aquatic insects",
+         ecosystem = "Global Rivers",
+         mechanism = "emergence")
+
+plot_compare_to_salmon = brandt_fig1_data %>% glimpse() %>% 
+  bind_rows(aquasync_np) %>% 
+  mutate(species_ecosystem = paste0(species, "\n(", ecosystem, ")")) %>% 
+  ggplot(aes(x = n_flux_annualkg,
+             y = p_flux_annualkg)) +
+  geom_point(shape = 21, aes(fill = log10(n_flux_annualkg),
+                             # color = log(n_flux_annualkg),
+                             size = log10(n_flux_annualkg))) +
+  labs(x = "N flux (kg/yr)",
+       y = "P flux (kg/yr)") +
+  scale_x_log10(labels = comma) +
+  scale_y_log10(labels = comma) +
+  guides(size = "none",
+         color = "none",
+         fill = "none") +
+  geom_text_repel(aes(label = species_ecosystem), size = 2) +
+  scale_fill_viridis() +
+  scale_color_viridis() +
+  brms::theme_default() +
+  NULL
+
+ggsave(plot_compare_to_salmon, file = "plots/plot_compare_to_salmon.jpg", 
+       width = 6.5, height = 6.5)
+
+
+plot_compare_to_salmon_linearscale = brandt_fig1_data %>% 
+  bind_rows(aquasync_np) %>% 
+  mutate(species_ecosystem = paste0(species, "\n(", ecosystem, ")")) %>% 
+  ggplot(aes(x = n_flux_annualkg,
+             y = p_flux_annualkg)) +
+  geom_text_repel(aes(label = species_ecosystem), size = 2, max.overlaps = 100, alpha = 0.5) +
+  geom_point(shape = 21, aes(fill = log10(n_flux_annualkg),
+                             # color = log(n_flux_annualkg),
+                             size = log10(n_flux_annualkg))) +
+  labs(x = "N flux (kg/yr)",
+       y = "P flux (kg/yr)")  +
+  scale_x_continuous(labels = comma) +
+  scale_y_continuous(labels = comma) +
+  guides(size = "none",
+         color = "none",
+         fill = "none")  +
+  scale_fill_viridis() +
+  scale_color_viridis() +
+  brms::theme_default() +
+  NULL
+
+ggsave(plot_compare_to_salmon_linearscale, 
+       file = "plots/plot_compare_to_salmon_linearscale.jpg", 
+       width = 6.5, height = 6.5)

@@ -17,27 +17,6 @@ sd_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:scale
 
 # 2) Get total mass ----------------------------------------------------------
 
-# post_total_summary = vector("list", length(data_to_predict_list))
-# system.time(
-#   for(i in seq_along(data_to_predict_list)) {
-#   post_total_summary[[i]] = data_to_predict_list[[i]] %>%
-#     # slice(1:100) %>%
-#     select(HYBAS_ID, precip_s) %>%
-#     mutate(author_year = "new") %>%
-#     left_join(hybas_area) %>%
-#     add_epred_draws(updated_gams[[3]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 500) %>%
-#     mutate(.epred = .epred*max_emergence)%>%
-#     mutate(kgdmhybasyr = (.epred*(area.redist*1e6))/1e6) %>% # convert water area to m2. Multiply by mg/m2. It yields mg/hybas. Then divide by 1e6 to get kg/hybas
-#     group_by(.draw) %>%
-#     reframe(sum_kgdmyr = sum(kgdmhybasyr))
-# }
-# )
-# # 
-# saveRDS(post_total_summary, file = "posteriors/post_total_summary.rds")
-# post_total_summary = readRDS(file = "posteriors/post_total_summary.rds")
-
-
-# same as above, but adds region. The above post_total_summary can probably be deleted.
 post_total_region_summary = vector("list", length(data_to_predict_list))
 system.time(
   for(i in seq_along(data_to_predict_list)) {
@@ -60,29 +39,29 @@ saveRDS(post_total_region_summary, file = "posteriors/post_total_region_summary.
 
 # Get total pufa ----------------------------------------------------------
 
-# post_pufatotal_summary = list()
-# # 
-# for(i in seq_along(data_to_predict_list)) {
-#   set.seed(20202)
-#   post_pufatotal_summary[[i]] = data_to_predict_list[[i]] %>%
-#     # slice(1:600) %>%
-#     select(HYBAS_ID, precip_s, stream_temp_s) %>%
-#     mutate(author_year = "new") %>%
-#     left_join(hybas_area) %>%
-#     add_epred_draws(updated_gams[[3]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 500) %>%
-#     ungroup %>%
-#     mutate(.epred = .epred*max_emergence) %>%
-#     mutate(kgdmhybasyr = (.epred*(area.redist*1e6))/1e6) %>%  # convert water area to m2. Multiply by mg/m2. It yields mg/hybas. Then divide by 1e6 to get kg/hybas
-#     select(HYBAS_ID, kgdmhybasyr, .draw) %>%
-#     group_by(.draw) %>%
-#     reframe(sum_kgdmyr = sum(kgdmhybasyr)) %>%
-#     left_join(post_pufa) %>%
-#     mutate(kgPUFAhybasyr = (mean_ngPUFA_mgDM*(sum_kgdmyr*10e6))/10e12) %>% # convert kgdm to kgPUFA. Multiply pufa concentration (ng/mg) by total flux (kg/10e6 = mg). Then convert ng to kg by dividing by 10e12
-#     group_by(.draw) %>%
-#     reframe(sum_kgPUFAyr = sum(kgPUFAhybasyr))
-# }
-# # 
-# saveRDS(post_pufatotal_summary, file = "posteriors/post_pufa_summary.rds")
+post_pufatotal_summary = list()
+#
+for(i in seq_along(data_to_predict_list)) {
+  set.seed(20202)
+  post_pufatotal_summary[[i]] = data_to_predict_list[[i]] %>%
+    # slice(1:600) %>%
+    select(HYBAS_ID, precip_s, stream_temp_s) %>%
+    mutate(author_year = "new") %>%
+    left_join(hybas_area) %>%
+    add_epred_draws(updated_gams[[3]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 500) %>%
+    ungroup %>%
+    mutate(.epred = .epred*max_emergence) %>%
+    mutate(kgdmhybasyr = (.epred*(area.redist*1e6))/1e6) %>%  # convert water area to m2. Multiply by mg/m2. It yields mg/hybas. Then divide by 1e6 to get kg/hybas
+    select(HYBAS_ID, kgdmhybasyr, .draw) %>%
+    group_by(.draw) %>%
+    reframe(sum_kgdmyr = sum(kgdmhybasyr)) %>%
+    left_join(post_pufa) %>%
+    mutate(kgPUFAhybasyr = (mean_ngPUFA_mgDM*(sum_kgdmyr*10e6))/10e12) %>% # convert kgdm to kgPUFA. Multiply pufa concentration (ng/mg) by total flux (kg/10e6 = mg). Then convert ng to kg by dividing by 10e12
+    group_by(.draw) %>%
+    reframe(sum_kgPUFAyr = sum(kgPUFAhybasyr))
+}
+#
+saveRDS(post_pufatotal_summary, file = "posteriors/post_pufa_summary.rds")
 post_pufatotal_summary = readRDS(file = "posteriors/post_pufa_summary.rds")
 
 post_total_dm = bind_rows(post_total_region_summary) %>%

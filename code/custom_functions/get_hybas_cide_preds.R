@@ -6,7 +6,8 @@ get_hybas_cide_preds = function(model){
   water_predictions = modeled_water %>% 
     filter(chemical_category == model$data2$chemical_category) %>% 
     mutate(chemical = chemical_category,
-           HYBAS_ID = bit64::as.character.integer64(HYBAS_L12),
+           # HYBAS_ID = bit64::as.character.integer64(HYBAS_L12),
+           HYBAS_ID = as.character(HYBAS_ID),
            mean.conc.year_units = "log10_ug_l")
   
   # get parameters of adult_conc ~ a + b*water_conc
