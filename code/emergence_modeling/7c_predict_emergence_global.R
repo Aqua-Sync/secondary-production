@@ -1,5 +1,6 @@
 library(tidyverse)
 library(tidybayes)
+library(viridis)
 
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
 
@@ -148,7 +149,6 @@ regional_and_global_flux = post_total_region_summary %>%
   bind_rows(post_total_global) %>% 
   ggplot(aes(x = sum_kgdmyr, y = reorder(region_name, -median_region),
              fill = log(median_region))) +
-  # ggridges::geom_density_ridges(stat = "binline", bins = 500) +
   labs(x = bquote("Total aquatic insect emergence (kgDM"%.% y^-1 ~")"),
        y = "Region") +
   stat_halfeye(size = 0.2) +
@@ -156,7 +156,7 @@ regional_and_global_flux = post_total_region_summary %>%
   scale_x_log10() +
   guides(fill = "none") +
   theme_bw() +
-  # geom_vline(xintercept = 1.54e+09) +
+  geom_vline(xintercept = 1.54e+09) +
   NULL
 
 ggsave(regional_and_global_flux, file = "plots/regional_and_global_flux.jpg", width = 4.5, height = 5,

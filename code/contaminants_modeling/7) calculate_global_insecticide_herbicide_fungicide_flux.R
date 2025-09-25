@@ -39,7 +39,7 @@ modeled_water_ides = readRDS(file = "data/modeled_water.rds") %>%  # values have
 # combined modeled water ides so that we have mean concentrations of insecticides, fungicides, or herbicides. We need to 
 # do this b/c that is what our models of tissue concentrations are based off of (i.e., any concentration of fungicide, not particular types of fungicide)
 modeled_water_ides_mean = modeled_water_ides %>% left_join(ides_wehave %>% distinct(cas, chemical_category)) %>% 
-  group_by(HYBAS_L12, chemical_category) %>% 
+  group_by(HYBAS_ID, chemical_category) %>% 
   reframe(mean.conc.year = mean(mean.conc.year, na.rm = T),
           mean.det.year = mean(mean.det.year, na.rm = T),
           max.conc.year = max(max.conc.year, na.rm = T))

@@ -1,5 +1,20 @@
 library(tidyverse)
 library(tidybayes)
+library(ggridges)
+library(tidybayes)
+library(brms)
+theme_set(theme_default())
+
+make_summary_table <- function(df, center = ".epred", lower = ".lower", upper = ".upper",
+                               center_interval = "median_cri", digits = 1) {
+  df %>%
+    mutate(
+      .center_val = round(.data[[center]], digits),
+      .lower_val = round(.data[[lower]], digits),
+      .upper_val = round(.data[[upper]], digits),
+      center_interval = paste0(.center_val, " (", .lower_val, " to ", .upper_val, ")")) %>% 
+    select(-.center_val, -.lower_val, -.upper_val)
+}
 
 # load data
 data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
@@ -22,22 +37,102 @@ hybas_regions = bind_rows(data_to_predict_list) %>% left_join(regions) %>%
 saveRDS(hybas_regions, file = "data/hybas_regions.rds")
 
 # load model predictions of each HYBAS_ID
-flux_predictions = readRDS(file = "posteriors/flux_predictions_all.rds") %>% 
-  mutate(region = as.character(str_sub(HYBAS_ID, 1, 1))) %>% left_join(regions)
+flux_predictions = read_csv("posteriors/flux_predictions.csv")
 
-write_csv(flux_predictions, file = "posteriors/flux_predictions.csv")
+# write_csv(flux_predictions, file = "posteriors/flux_predictions.csv")
 
 # load posterior of global and regional total flux
-flux_global = readRDS(file = "posteriors/flux_global.rds") %>% mutate(region_name = "Earth", 
-                                                                      global = "Earth")
-flux_region = readRDS(file = "posteriors/flux_region.rds") %>% mutate(global = "Regional",
-                                                                      region = as.character(region)) %>% left_join(regions)
+# flux_global = readRDS(file = "posteriors/flux_global.rds") %>% mutate(region_name = "Earth", 
+#                                                                       global = "Earth")
+# flux_region = readRDS(file = "posteriors/flux_region.rds") %>% mutate(global = "Regional",
+#                                                                       region = as.character(region)) %>% left_join(regions)
+# 
+# flux_region_global = bind_rows(flux_region, flux_global)
+flux_region_global = readRDS(file = "posteriors/flux_region_global.rds")
+# saveRDS(flux_region_global, file = "posteriors/flux_region_global.rds")
 
-flux_region_global = bind_rows(flux_region, flux_global)
+# plot flux per m2 --------------------------------------------------------
 
-saveRDS(flux_region_global, file = "posteriors/flux_region_global.rds")
+d = readRDS(file = "posteriors/post_mass_nutrients.rds") %>% 
+  filter(region_name != "Greenland")%>% 
+  group_by(region_name) %>% 
+  mutate(median_region = median(mgDMm2y, na.rm = T)) %>% 
+  ungroup %>% 
+  group_by(HYBAS_ID, region_name, median_region) %>%
+  median_qi(mgDMm2y)
 
-# plot --------------------------------------------------------------------
+d_summary = d %>% group_by(region_name, median_region) %>% 
+  median_qi(mgDMm2y) %>% 
+  make_summary_table(center = "mgDMm2y", digits = 0)
+
+write_csv(d_summary, file = "tables/region_perm2.csv")
+
+plot_region_perm2 = d %>% 
+  ggplot(aes(x = mgDMm2y, y = reorder(region_name, -median_region))) + 
+  stat_density_ridges(aes(fill = median_region), 
+                      quantile_lines = T, 
+                      quantiles = 2,
+                      color = "white") +
+  # stat_halfeye(aes(fill = median_region)) +
+  scale_x_continuous(limits = c(NA, 5000), 
+                     labels = scales::comma) +
+  scale_fill_viridis_c(option = "plasma") +
+  guides(fill = "none",
+         color = "none") +
+  labs(y = "",
+       x = expression("Annual Emergence Production (mgDM/m"^2*"/y)")) +
+  # geom_text(data = d_summary, aes(label = center_interval),
+  #           nudge_y = 0.2, 
+  #           x = 4000,
+  #           size = 3,
+  #           family = "serif") +
+  NULL
+
+ggsave(plot_region_perm2, file = "plots/plot_region_perm2.jpg",
+       width = 6.5, height = 6.5, dpi = 400)
+
+# plot flux per m2 per biome ---------------
+
+d_biome = readRDS(file = "posteriors/post_mass_nutrients_biome.rds") %>% 
+  group_by(terr_biom) %>% 
+  mutate(median_region = median(mgDMm2y, na.rm = T)) %>% 
+  group_by(HYBAS_ID, terr_biom, median_region) %>%
+  median_qi(mgDMm2y)
+
+d_biome_summary = d_biome %>% 
+  group_by(terr_biom, median_region) %>% 
+  median_qi(mgDMm2y) %>% 
+  make_summary_table(center = "mgDMm2y", digits = 0)
+
+
+write_csv(d_biome_summary, file = "tables/biome_perm2.csv")
+
+
+plot_biome_perm2 = d_biome %>% 
+  ggplot(aes(x = mgDMm2y, y = reorder(terr_biom, -median_region))) + 
+  stat_density_ridges(aes(fill = median_region), 
+                      quantile_lines = T, 
+                      quantiles = 2,
+                      color = "white") +
+  scale_x_continuous(limits = c(NA, 5000), 
+                     labels = scales::comma) +
+  scale_fill_viridis_c(option = "plasma") +
+  guides(fill = "none",
+         color = "none") +
+  labs(y = "",
+       x = expression("Annual Emergence Production (mgDM/m"^2*"/y)")) +
+  # geom_text(data = d_biome_summary, aes(label = center_interval),
+  #           nudge_y = 0.2,
+  #           x = 4000,
+  #           size = 3,
+  #           family = "serif") +
+  NULL
+
+ggsave(plot_biome_perm2, file = "plots/plot_biome_perm2.jpg",
+       width = 6.5, height = 6.5, dpi = 400)
+
+
+# plot hydrobasin and global lines --------------------------------------------------------------------
 
 flux_hydrobasin_plot = flux_predictions %>% 
   sample_n(120000) %>%
@@ -115,8 +210,13 @@ brandt_fig1_data = read_csv("C:/Users/jeff.wesner/OneDrive - The University of S
           mechanism = "Aerial Bioflows",
           n_flux_annualkg = 1500000,
           p_flux_annualkg = 150000,
-          source = "Huang et al. 2024 PNAS") 
-
+          source = "Huang et al. 2024 PNAS") %>% 
+  add_row(species = "Anadromous Fish",
+          ecosystem = "Global",
+          mechanism = "Seasonal Migration",
+          n_flux_annualkg = 5.6e6*9.09, # Doughty has data for P only, so N is converted using the 0.11:1 P:N ration calculated from Brandt's salmon paper (b/c 1/0.11 = 9.09)
+          p_flux_annualkg = 5.6e6,
+          source = "Doughty et al. 2016 PNAS")
 
 post_total_all = readRDS(file = "posteriors/post_total_all.rds")
 

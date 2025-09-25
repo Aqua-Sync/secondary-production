@@ -34,11 +34,24 @@ cas_names = readRDS(file = "data/cas_names.rds") %>%
                                        chemical == "Cadmium" ~ "Cd"
   ))
 # Wolfram predictions of contaminants. Generated in wrangle_modeled_water.R. It uses water concentrations from Jakob Wolfram on seafile.rlp.net...then reformats.
-modeled_water = readRDS(file = "data/modeled_water.rds") # values have been corrected for minimums with essential elements (i.e., if water concentrations indicate zero Se but still has emergence, then we need to assign a minimum amount to flux b/c flux of Se in tissues can't also be zero)
+modeled_water = readRDS(file = "data/modeled_water.rds") %>%  # values have been corrected for minimums with essential elements (i.e., if water concentrations indicate zero Se but still has emergence, then we need to assign a minimum amount to flux b/c flux of Se in tissues can't also be zero)
+  left_join(cas_names)
 
-cas_zinc = cas_names %>% filter(chemical == "Zinc")
-modeled_zinc = modeled_water %>% filter(cas == unique(cas_zinc$cas))
+modeled_zinc = modeled_water %>% filter(chemical == "Zinc")
 
+
+# compare mean and max water
+modeled_water %>% 
+  filter(chemical %in% c("Selenium", "Zinc", "Mercury", "Lead", "Copper", "Cadmium")) %>% 
+  group_by(cas) %>% 
+  sample_n(10000) %>% 
+  ggplot(aes(x = 10^mean.conc.year, y = 10^max.conc.year)) + 
+  geom_point(shape = ".") +
+  facet_wrap(~chemical_category) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_vline(xintercept = 120) +
+  geom_hline(yintercept = 120)
 
 quantile(10^modeled_zinc$max.conc.year)
 

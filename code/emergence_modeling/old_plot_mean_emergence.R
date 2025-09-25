@@ -12,9 +12,11 @@ mod_dat = updated_gams[[3]]$data %>%
   mutate(precip_raw = (precip_s*attributes(d$precip_s)[[3]]) + attributes(d$precip_s)[[2]]) %>% 
   mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) 
 
+data_to_predict = readRDS("data/data_to_predict.rds") # abiotic variables for all 1 million HYBAS
+
 # plot emergence conditional
-precip_emergence_plot = tibble(precip_s = seq(min(mod_dat$precip_s),
-                      max(mod_dat$precip_s),
+precip_emergence_plot = tibble(precip_s = seq(min(data_to_predict$precip_s),
+                      max(data_to_predict$precip_s),
                       length.out = 30)) %>% 
   mutate(HYBAS_ID = "new",
          stream_temp_s = 0) %>% 
@@ -27,14 +29,14 @@ precip_emergence_plot = tibble(precip_s = seq(min(mod_dat$precip_s),
   scale_fill_brewer(palette = "Greens") +
   # guides(fill = "none") +
   labs(y = "Annual Emergence Production (gDMm2y)",
-       x = "Annual Precipitation (mm/km2/yr)",
+       x = "Annual Precipitation (mm/m2/yr)",
        fill = "Uncertainty\nInterval") 
 
 temp_dat = updated_gams[[3]]$data%>% 
   mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) 
 
-temp_emergence_plot = tibble(stream_temp_s = seq(min(temp_dat$stream_temp_s),
-                                              max(temp_dat$stream_temp_s),
+temp_emergence_plot = tibble(stream_temp_s = seq(min(data_to_predict$stream_temp_s),
+                                              max(data_to_predict$stream_temp_s),
                                               length.out = 30)) %>% 
   mutate(HYBAS_ID = "new",
          precip_s = 0) %>% 
@@ -78,9 +80,9 @@ low_gratton = 1000*(0.4*2)/0.9
 high_gratton = 1000*(3.1*2)/0.9
 mean_gratton = 1000*(1.052*2)/0.9
 # get mean emergence production
-post_mgdmm2y = mod_dat %>% 
-  distinct(precip_s) %>% 
-  add_epred_draws(updated_gams[[1]], re_formula = NA) %>% 
+post_mgdmm2y = updated_gams[[3]]$data %>% 
+  distinct(precip_s, stream_temp_s) %>% 
+  add_epred_draws(updated_gams[[3]], re_formula = NA) %>% 
   mutate(.epred = .epred*max_emergence) %>% 
   group_by(.draw) %>% 
   reframe(mean_mgDMm2y = mean(.epred))

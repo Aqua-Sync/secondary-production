@@ -14,9 +14,10 @@ gratton_ep = read_csv("data/e_p_ratios.csv") %>% clean_names() %>%
   filter(type == "Streams")
 
 # ep_model = brm(e_p_ratio ~ 1 + (1|reference) + (1|taxa_measured),
-#                family = Beta(link = "logit"),
-#                data = gratton_ep, 
-#                prior = c(prior(exponential(2), class = "sd")))
+               # family = Beta(link = "logit"),
+               # data = gratton_ep,
+               # prior = c(prior(exponential(2), class = "sd"),
+                         # prior(Normal(-1.45, 0.5))))
 # 
 # saveRDS(ep_model, file = "models/ep_model.rds")
 
@@ -52,10 +53,38 @@ emergence_production = secondary_prod_sd %>%
 write_csv(emergence_production, file = "data/emergence_production.csv")
 
 # 5) plot
-emergence_production %>% 
-  ggplot(aes(y = mean_emergence_mgdmm2y, x = id, color = empirical_emergence)) + 
-  geom_point() +
-  geom_linerange(aes(ymin = mean_emergence_kgdmm2y - sd_emergence_kg,
-                     ymax = mean_emergence_kgdmm2y + sd_emergence_kg)) +
+
+emergence_production = read_csv(file = "data/emergence_production.csv")
+
+emergence_compared_raw_acsp = emergence_production %>% 
+  mutate(source = case_when(empirical_emergence == "no" ~ "Converted from ACSP",
+                            TRUE ~ "Directly Measured")) %>% 
+  arrange(mean_emergence_mgdmm2y) %>% 
+  mutate(rank = 1:nrow(.)) %>% 
+  ggplot(aes(y = mean_emergence_mgdmm2y,
+             color = source,
+             alpha = source,
+             x = NA)) + 
+  geom_jitter(width = 0.2) +
   # scale_y_log10() +
+  theme_default() +
+  labs(y = "Annual Emergence Production (gDMm²y)",
+       x = "All Emergence Estimates (n = 311)",
+       color = "Method",
+       alpha = "Method") +
+  theme(legend.text = element_text(size = 8),
+        axis.text.x = element_blank()) +
+  ggthemes::scale_color_colorblind() + 
   NULL
+
+ggsave(emergence_compared_raw_acsp, file = "plots/emergence_compared_raw_acsp.jpg",
+       width = 5, height = 5, dpi = 400)
+
+emergence_production_with_vars %>% 
+  group_by(empirical_emergence) %>% 
+  tally()
+
+emergence_production_with_vars %>% 
+  group_by(empirical_emergence) %>% 
+  reframe(mean = mean(mean_emergence_mgdmm2y, na.rm = T),
+          sd = sd(mean_emergence_mgdmm2y, na.rm = T))

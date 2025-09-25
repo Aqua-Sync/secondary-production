@@ -55,7 +55,7 @@ mod_list = readRDS(file = "models/mod_list.rds")
 
 source("code/custom_functions/get_hybas_cide_preds.r") # function to combine biomass and contaminant concentrations, then multiply to get posterior prediction of contaminant flux in each HYBAS
 
-# 2) Filter the models to only match the insecticides/herbcides/or fungicides
+# 2) Filter the models to only match the insecticides/herbicides/or fungicides
 mod_list_ides = Filter(function(model) model$data2$chemical_category %in% c("fungicide", "herbicide", "insecticide"), mod_list)
 
 # 3) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
@@ -68,17 +68,30 @@ hybas_predictions_ides_df = bind_rows(hybas_predictions_ides) %>%
 
 saveRDS(hybas_predictions_ides_df, file = "posteriors/hybas_predictions_pest_herb_fungicide.rds")
 
+hybas_predictions_ides_df_filtered = hybas_predictions_ides_df %>% 
+  select(HYBAS_ID, element, starts_with("chem")) %>% 
+  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
+              select(HYBAS_ID, SUB_AREA, dis_m3_pyr, crp_pc_sse, crp_pc_use) %>% 
+              mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
+  mutate(chem_flux_mg_year = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year, TRUE ~ 0),
+         chem_flux_mg_year_lower95 = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year_lower95, TRUE ~ 0),
+         chem_flux_mg_year_upper95 = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year_upper95, TRUE ~ 0),
+         chem_flux_mg_year_lower50 = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year_lower50, TRUE ~ 0),
+         chem_flux_mg_year_upper50 = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year_upper50, TRUE ~ 0))
+
+saveRDS(hybas_predictions_ides_df_filtered, file = "posteriors/hybas_predictions_pest_herb_fungicide_filtered.rds")
+
 rm(modeled_water)
 
-# split and save by separate elements
+# 5) split and save by separate elements
 
-hybas_predictions_ides_df = readRDS(file = "posteriors/hybas_predictions_pest_herb_fungicide.rds") 
+hybas_predictions_pest_herb_fungicide_filtered = readRDS(file = "posteriors/hybas_predictions_pest_herb_fungicide_filtered.rds") 
 
-split_data_ides = split(hybas_predictions_ides_df, hybas_predictions_ides_df$element)
+split_data_ides = split(hybas_predictions_pest_herb_fungicide_filtered, hybas_predictions_pest_herb_fungicide_filtered$element)
 
-# Save each split tibble as an .rds file
+# save each split tibble as an .rds file
 lapply(names(split_data_ides), function(element) {
-  filename <- paste0("posteriors/hybas_predictions_mgperyear_", element, ".rds")
+  filename <- paste0("posteriors/hybas_predictions_mgperyear_filtered_", element, ".rds")
   saveRDS(split_data_ides[[element]], file = filename)
 })
 

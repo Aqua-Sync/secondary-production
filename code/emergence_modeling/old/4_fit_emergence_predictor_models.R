@@ -41,7 +41,7 @@ saveRDS(updated_gams, file = "models/updated_gams.rds")
 
 # The individual models below are all stored in a single .rds "models/updated_gams.rds"
 # fit full precip model, then use update for subsequent models since the priors remain the same (due to standardized predictors)
-fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID),
+fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | HYBAS_ID),
                      family = Gamma(link = "log"),
                      data = emergence_production_with_vars,
                      prior = c(prior(normal(-5, 2), class = Intercept),
@@ -50,31 +50,31 @@ fit_gam_precip = brm(emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID)
                                prior(exponential(0.01), class = shape)),
                      save_pars = save_pars(all = T))
 
-fit_gam_temp = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_tempprecip = update(fit_gam_precip, formula = . ~ s(precip_s, stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_temp = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_tempprecip = update(fit_gam_precip, formula = . ~ s(precip_s, stream_temp_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
 fit_gam_intercept = update(fit_gam_precip, formula = . ~ (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                            prior = c(prior(normal(-5, 2), class = Intercept),
                                      # prior(normal(0, 2), class = b),
                                      prior(exponential(2), class = sd),
                                      prior(exponential(4), class = shape)))
-fit_gam_tempaddprecip = update(fit_gam_precip, formula = . ~ s(precip_s) + s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_footprint_s93 = update(fit_gam_precip, formula = . ~ s(hft_ix_s93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_tempaddprecip = update(fit_gam_precip, formula = . ~ s(precip_s) + s(stream_temp_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_footprint_s93 = update(fit_gam_precip, formula = . ~ s(hft_ix_s93_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                                control = list(adapt_delta = 0.95))
-fit_gam_footprint_u93 = update(fit_gam_precip, formula = . ~ s(hft_ix_u93_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_footprint_u93 = update(fit_gam_precip, formula = . ~ s(hft_ix_u93_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                                control = list(adapt_delta = 0.95))
-fit_gam_footprint_s09 = update(fit_gam_precip, formula = . ~ s(hft_ix_s09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_footprint_s09 = update(fit_gam_precip, formula = . ~ s(hft_ix_s09_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                                control = list(adapt_delta = 0.95))
-fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_footprint_u09 = update(fit_gam_precip, formula = . ~ s(hft_ix_u09_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                                control = list(adapt_delta = 0.95))
-fit_gam_elevation = update(fit_gam_precip, formula = . ~ s(ele_mt_sav_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_elevation = update(fit_gam_precip, formula = . ~ s(ele_mt_sav_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                            control = list(adapt_delta = 0.95))
-fit_gam_discharge = update(fit_gam_precip, formula = . ~ s(logdis_m3_pyr_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_forest = update(fit_gam_precip, formula = . ~ s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
-fit_gam_cropland = update(fit_gam_precip, formula = . ~ s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
+fit_gam_discharge = update(fit_gam_precip, formula = . ~ s(logdis_m3_pyr_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_forest = update(fit_gam_precip, formula = . ~ s(for_pc_sse_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_cropland = update(fit_gam_precip, formula = . ~ s(crp_pc_sse_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars,
                           control = list(adapt_delta = 0.95))
-fit_gam_tempadddischarge = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+fit_gam_tempadddischarge = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
 fit_gam_tempadddischargeforest = update(fit_gam_precip, formula = . ~ s(stream_temp_s) + s(crp_pc_sse_s) +
-                                         s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
+                                         s(for_pc_sse_s) + (1 | HYBAS_ID), newdata = emergence_production_with_vars)
 
 # put into a list
 updated_gams = list(fit_gam_precip,
@@ -101,22 +101,16 @@ saveRDS(updated_gams, file = "models/updated_gams.rds")
 model_formulas_list = list()
 
 for(i in 1:length(updated_gams)){
-  model_formulas_list[[i]] = tibble(formula = deparse(updated_gams[[i]]$formula$formula[[3]])) %>% 
-    mutate(formula = stringr::str_c(formula, collapse = " ")) %>% 
-    pull(formula) %>% 
-    str_squish()
-  
-  model_formulas_list[[i]] = model_formulas_list[[i]][1] # remove duplicates
+  model_formulas_list[[i]] = tibble(formula = deparse(updated_gams[[i]]$formula$formula[[3]]))
 }
 
-model_list = bind_rows(as_tibble(unlist(model_formulas_list)))
+model_list = bind_rows(model_formulas_list)
 write_csv(model_list, file = "tables/model_list.csv")
 
-
 # compare models  ---------------------
-# get_mod_names = function(model){as.character(model$formula$formula[[3]][2])}
+get_mod_names = function(model){as.character(model$formula$formula[[3]][2])}
 
-mod_names = read_csv("tables/model_list.csv") %>% pull(value)
+mod_names = lapply(updated_gams, FUN = get_mod_names) %>% unlist()
 
 ic_gams = lapply(updated_gams, FUN = brms::loo) 
 
@@ -128,15 +122,11 @@ elpd_diffs = loo_compare(ic_gams) %>%
          upper = elpd_diff + 2*se_diff) %>% 
   mutate(models = mod_names)
 
-write_csv(elpd_diffs, file = "tables/model_selection.csv")
-
-elpd_diffs = read_csv("tables/model_selection.csv")
-
 model_comparison = elpd_diffs  %>% 
   ggplot(aes(x = reorder(models, elpd_diff),
              y = elpd_diff,
-             ymin = elpd_diff - se_diff, 
-             ymax = elpd_diff + se_diff)) +
+             ymin = lower, 
+             ymax = upper)) +
   geom_pointrange() +
   geom_hline(yintercept = 0) +
   coord_flip()

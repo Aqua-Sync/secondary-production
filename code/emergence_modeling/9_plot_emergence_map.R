@@ -4,39 +4,6 @@ library(ggmap)
 library(ggExtra)
 library(viridis)
 
-post_flux_all_peryear_hybas = readRDS(file = "posteriors/hybas_predictions_mass_nutrients.rds") %>% 
-  left_join(readRDS("data/hybas_regions.rds")) %>% 
-  left_join(readRDS("data/HYBAS_surface_area_REDIST.rds") %>% 
-              mutate(HYBAS_ID = as.numeric(HYBAS_ID))) %>% 
-  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
-              select(HYBAS_ID, BA_km2)) %>% 
-  filter(area.redist >= 1e-02) # hacky way to remove water from obvious deserts like the sahara
-
-dm = post_flux_all_peryear_hybas %>%
-  filter(grepl("kgdm", units))
-
-dm = readRDS(file = "posteriors/hybas_predictions_kgdm_peryear.rds") %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID)) %>% 
-  left_join(readRDS("data/hybas_regions.rds") %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
-  left_join(readRDS("data/HYBAS_surface_area_REDIST.rds") %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
-  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
-              select(HYBAS_ID, SUB_AREA) %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID)))
-
-dm_perm2 = readRDS(file = "posteriors/post_flux_kgdm_perm2_perhybas.rds") %>% 
-  ungroup %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID)) %>% 
-  left_join(readRDS("data/hybas_regions.rds") %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
-  left_join(readRDS("data/HYBAS_surface_area_REDIST.rds") %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
-  left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
-              select(HYBAS_ID, SUB_AREA) %>% 
-              mutate(HYBAS_ID = as.character(HYBAS_ID)))
-
-
 dm2 = readRDS("posteriors/hybas_predictions_kgdm_peryear.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   left_join(readRDS("data/HYBAS_surface_area_REDIST.rds") %>% 
@@ -44,10 +11,11 @@ dm2 = readRDS("posteriors/hybas_predictions_kgdm_peryear.rds") %>%
   left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
               select(HYBAS_ID, BA_km2)) 
 
+set.seed(03354)
 map = dm2 %>% 
   # filter(median > 0) %>%
   filter(region_name != "Greenland") %>% 
-  # sample_n(3000)  %>%
+  sample_n(300000)  %>%
   # filter(median > median(median, na.rm = T)) %>% 
   ggplot(aes(x = lon, y = lat, color = log10(median + 0.01))) + 
   geom_point(shape = ".") + 
@@ -198,12 +166,12 @@ metals_map = metals %>%
   group_by(cas) %>% 
   mutate(chem_flux_mg_year_s = chem_flux_mg_year/max(chem_flux_mg_year)) %>% 
   # filter(median > 0) %>%
-  sample_n(100000)  %>% 
+  sample_n(1000)  %>%
   ggplot() + 
   geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "grey60") +  #fill is the land color
   coord_quickmap() +
   geom_point(shape = 20, size = 0.1,
-             aes(x = lon, y = lat, color = chem_flux_mg_year_s)) + 
+             aes(x = lon, y = lat, color = chem_flux_mg_year + 0.01)) + 
   scale_color_viridis(trans = "log10") +
   theme(legend.position = "top") +
   facet_wrap(~element) +
