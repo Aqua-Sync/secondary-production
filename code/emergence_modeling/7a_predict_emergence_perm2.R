@@ -6,10 +6,12 @@ theme_set(theme_default())
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence <- max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
+
 data_to_predict = readRDS("data/data_to_predict.rds") %>% 
   filter(SUB_AREA > 0) %>% 
-  filter(region != "Greenland") %>% 
-  left_join(hybas_covariates %>% select(HYBAS_ID, LAT, terr_biom))
+  left_join(readRDS("data/hybas_regions.rds")) %>% 
+  filter(region_name != "Greenland") %>%
+  left_join(readRDS("data/hybas_covariates.rds") %>% select(HYBAS_ID, LAT, terr_biom))
 
 mod = updated_gams[[3]]
 mod_dat = mod$data
