@@ -1,28 +1,97 @@
 ---
 title: "R Notebook"
 output: html_notebook
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
-2025-04-18:
-  Fixed miscoded insecticide "propyzamide", which was originally labeled as a fungicide and herbicide in our data.
-  Re-ran corresponding models in models/mod_list.rds and saved. 
-  Wrote code to estimates flux of herbicides, fungicides, and insecticides. That is contained in `6) calculate_insecticide_herbicide_flux_perhybas.R`
-  Ran the updated code to produce estimates of flux of the "-cides". 
-  
-2025-05-06:
-  Working with new predictions I noticed that the total amount of emergence is larger coming from Siberia than from South America. Siberia has ~half of the water area, but also has ~2X's higher predicted emergence perm2 per yr...the precipitation-emergence model "updated_gams[[1]]" has a hump-shaped relationship where emergence peaks at moderate precipitation and declines thereafter. That's fine, but the precipitation data that informs the model ranges from ~-2 to 4 (in standardized units). By comparison, the precipitation data for South America ranges from ~-2 to 17. As a result, when we predict emergence in South America many places have low predicted emergence (in units of mg/m2/y) because they have high precipitation. That is consistent with the fitted data, but is it reasonable for the predictions?
-  It should also be noted that the raw data from South America does suggest lower annual emergence compared to North and South America, so perhaps this is enough justification to leave it as is. 
-  
-I ran the precip model again with log10 transformed precip (and then z-scored), but the results were similar. That doesn't fix the problem. 
+2025-04-18: Fixed miscoded insecticide "propyzamide", which was originally labeled as a fungicide and herbicide in our data.
+Re-ran corresponding models in models/mod_list.rds and saved.
+Wrote code to estimates flux of herbicides, fungicides, and insecticides.
+That is contained in `6) calculate_insecticide_herbicide_flux_perhybas.R` Ran the updated code to produce estimates of flux of the "-cides".
 
-Instead, using the model that has both temperature and precip yielded results that made more logical sense. The reason is probably b/c the temp model down weights emergence at low temperatures (and at extreme temperatures). Thus, the Siberian emergence result is smaller as we would expect, and Asia, South America are again some of the highest, also as we would expect given their tropical climates.
+2025-05-06: Working with new predictions I noticed that the total amount of emergence is larger coming from Siberia than from South America.
+Siberia has \~half of the water area, but also has \~2X's higher predicted emergence perm2 per yr...the precipitation-emergence model "updated_gams[[1]]" has a hump-shaped relationship where emergence peaks at moderate precipitation and declines thereafter.
+That's fine, but the precipitation data that informs the model ranges from \~-2 to 4 (in standardized units).
+By comparison, the precipitation data for South America ranges from \~-2 to 17.
+As a result, when we predict emergence in South America many places have low predicted emergence (in units of mg/m2/y) because they have high precipitation.
+That is consistent with the fitted data, but is it reasonable for the predictions?
+It should also be noted that the raw data from South America does suggest lower annual emergence compared to North and South America, so perhaps this is enough justification to leave it as is.
 
-2025-05-07: After meeting with AquaSync team, we will move forward with the temp*precip model. 
-2025-05-08: Using new estimates, I re-ran the code to calculate global contaminant flux. It ran well and compares reasonably with the previous result. The code itself produces a bunch of warnings like ℹ In argument:
+I ran the precip model again with log10 transformed precip (and then z-scored), but the results were similar.
+That doesn't fix the problem.
+
+Instead, using the model that has both temperature and precip yielded results that made more logical sense.
+The reason is probably b/c the temp model down weights emergence at low temperatures (and at extreme temperatures).
+Thus, the Siberian emergence result is smaller as we would expect, and Asia, South America are again some of the highest, also as we would expect given their tropical climates.
+
+2025-05-07: After meeting with AquaSync team, we will move forward with the temp\*precip model.
+2025-05-08: Using new estimates, I re-ran the code to calculate global contaminant flux.
+It ran well and compares reasonably with the previous result.
+The code itself produces a bunch of warnings like ℹ In argument:
 
 `kg_flux = sample_gamma(n = 1, mean = mean, sd = sd)`.
-`Caused by warning in `rgamma()`:`
-`! NAs produced`
+`Caused by warning in`rgamma()`:` `! NAs produced`
 
-I looked into these warnings. They are harmless. They're caused by trying to sample from basins that have zero contaminants and hence a zero standard deviation, so that sample_gamma(n = 1, mean = 0, sd = 0) causes and error.
+I looked into these warnings.
+They are harmless.
+They're caused by trying to sample from basins that have zero contaminants and hence a zero standard deviation, so that sample_gamma(n = 1, mean = 0, sd = 0) causes and error.
 
+2025-05-17: I refit the emergence regression models after realizing that the precipitation measures were originally coded as total precip per basin per year.
+What we needed was total precip per m2 per year.
+Therefore, I calculated that using pre_mm_syr/SUB_AREA and then re-ran the models.
+The predictor was still scaled and is still the same name "precip_s".
+but it now means precip per m2 per yr.**(UPDATE: We no longer do this. As of 06/27, I had misinterpreted pre_mm_syr. It's units are mm/m2 already, so no need to adjust for sub basin area. All models are refit and predictions corrected).**
+
+2025-05-23: After presenting the talk at SFS on May 22, one question was how we checked whether our models accurately predicted measured flux.
+I didn't know how to answer because our modeled flux is at the basin scale (i.e., mgDM/basin) while the measured fluxes are all mgDM/m2.
+But we *can* approximate this by multiplying the raw emergence estimates by the area of the basin.
+I did that and compared it to the modeled estimates below:
+
+```{r}
+library(here)
+knitr::include_graphics(here("plots/raw_vs_modeled_emergence_per_hybas.jpg"))
+```
+
+This plot shows that the modeled estimates of flux closely match the raw estimates.
+Again, the raw estimates on the y-axis are taken as $flux_{raw} =\text{kg}^{m^2}_{raw}*\text{water}^{m^2}_{basin}$, while the modeled estimates are $flux_{modeled} =\text{kg}^{m^2}_{modeled}*\text{water}^{m^2}_{basin}$.
+The line shows the 1:1 relationship.
+Error bars show the 95% CrI of the modeled estimates.
+The modeled estimates are derived from the posterior predictive distribution using the varying intercepts of HYBAS_ID in the model.
+Hence the correlation here is several steps removed from the raw data, which makes the relationship encouraging.
+
+2025-05-30: In our phone call the previous week regarding mortality effects, Johanna asked to see the distribution of mean metal concentrations in addition to max metal concentrations.
+I've done that for Zine below.
+It shows that max concentrations still do no commonly exceed EPA criteria (dotted line):
+
+```{r}
+library(here)
+knitr::include_graphics(here("plots/zinc_distribution.jpg"))
+```
+
+2025-06-17: We want to visualize the relative risk of each basin using the approach with used for Fig.
+4(?) in Brandt et al. 2024.
+To do that we need
+
+1.  sum the total amount of contaminants in each hybas
+
+2.  sum the total amount of contaminants globally
+
+3.  divide total_hybas/total_global to get the proportion of global contamiants that are exported from each basin
+
+4.  Repeat for Biomass
+
+5.  Then subtract the proportion of contaminants - proportion of biomass for each basin.
+
+6.  Repeat the above with uncertainty and we'll get a distribution of relative risk for each basin/region/etc.
+    Then we can see, for example, if North America exports relatively more contaminants than Europe.
+
+2025-06-27: Working on the relative flux of nutrients and contaminants.
+I noticed that the median proportions did not sum to one as I expected.
+However, I checked that the individual iterations all summed to one, so the lack of that in the summarized data set is just a function of taking a median across iterations of proportions.
+
+2025-07-08: Updated the PUFA models to only include studies with epa+dha.
+
+2025-07-09: The regression models for emergence (the GAMs) only had HYBAS_ID as a varying intercept but not author_year.
+I updated the models to include author_year.
