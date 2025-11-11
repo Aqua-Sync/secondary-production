@@ -59,7 +59,7 @@ water_range = modeled_water_ranges %>%
   coord_flip() +
   labs(color = "Water Concentration Range",
        x = "Chemical",
-       y = "Water concentrations\nscaled to min/max)") +
+       y = "Water concentrations\n(scaled to min/max)") +
   scale_color_brewer(type = "qual", palette = 3) +
   theme(legend.title = element_text(size = 9),
         legend.text = element_text(size = 8))

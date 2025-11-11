@@ -15,6 +15,7 @@ hybas_predictions_nonessentialmetals <- readRDS("posteriors/hybas_predictions_me
   select(HYBAS_ID, starts_with("chem_flux"), element) %>% 
   filter(element %in% c("Cd", "Pb", "Hg")) # filter to only non-essential metals
 
+hybas_covariates = readRDS("data/hybas_covariates.rds")
 
 # 1) load posteriors for each contaminant and bind them
 # Note, we only need to work with dry mass and PUFAs, because C/N/P are linear transformations of dry mass so are redundant for calculating a proportion.
@@ -22,6 +23,11 @@ hybas_bind_nutrients = bind_rows(readRDS("posteriors/hybas_predictions_kgPUFA_pe
                                  readRDS("posteriors/hybas_predictions_kgdm_peryear.rds")) %>% 
   left_join(readRDS("data/hybas_regions.rds"))
 
+hybas_bind_contaminants = bind_rows(hybas_predictions_mgperyear_fungicide,
+                                    hybas_predictions_mgperyear_herbicide,
+                                    hybas_predictions_mgperyear_insecticide,
+                                    hybas_predictions_nonessentialmetals) %>% 
+  left_join(readRDS("data/hybas_regions.rds") %>% mutate(HYBAS_ID = as.character(HYBAS_ID)))
 
 sum_contaminants = hybas_bind_contaminants %>% 
   group_by(HYBAS_ID) %>% 
@@ -71,8 +77,8 @@ nut_pesticide_diffs = left_join(prop_nutrients, prop_pesticides) %>%
 
 
 saveRDS(nut_pesticide_diffs, file = "posteriors/nut_pesticide_diffs.rds")
-saveRDS(nut_pesticide_diffs, file = "posteriors/nut_nonessential_diffs.rds")
-saveRDS(nut_pesticide_diffs, file = "posteriors/nut_contaminants_diffs.rds")
+saveRDS(nut_nonessential_diffs, file = "posteriors/nut_nonessential_diffs.rds")
+saveRDS(nut_cont_diffs, file = "posteriors/nut_contaminants_diffs.rds")
 
 latitude_profile_relative <- nut_pesticide_diffs %>%
   # group_by(terr_biom) %>% 

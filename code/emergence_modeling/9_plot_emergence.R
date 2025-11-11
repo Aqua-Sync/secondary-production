@@ -109,14 +109,15 @@ write_csv(d_biome_summary, file = "tables/biome_perm2.csv")
 
 
 plot_biome_perm2 = d_biome %>% 
+  filter(terr_biom != "NA") %>% 
   ggplot(aes(x = mgDMm2y, y = reorder(terr_biom, -median_region))) + 
-  stat_density_ridges(aes(fill = median_region), 
-                      quantile_lines = T, 
-                      quantiles = 2,
-                      color = "white") +
-  scale_x_continuous(limits = c(NA, 5000), 
-                     labels = scales::comma) +
-  scale_fill_viridis_c(option = "plasma") +
+  stat_density_ridges(aes(fill = as.factor(round(median_region, -2)),
+                      # quantile_lines = T,
+                      # quantiles = 2.
+                      color = NA)) +
+  # scale_fill_viridis_c(option = "plasma") +
+  scale_fill_brewer(type = "div", palette = "RdYlBu", 
+                    direction = -1) +
   guides(fill = "none",
          color = "none") +
   labs(y = "",
