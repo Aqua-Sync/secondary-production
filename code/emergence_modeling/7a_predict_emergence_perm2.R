@@ -130,7 +130,7 @@ post_mass_nutrients_pufa = post_mass_nutrients %>%
   select(.draw, contains("m2")) %>% 
   pivot_longer(cols = -.draw) %>% 
   group_by(name) %>% 
-  median_qi(value, .width = 0.75) %>% 
+  median_qi(value, .width = 0.95) %>% 
   rename(chemical = name,
          median = value) %>% 
   bind_rows(post_pufa_flux) %>% 

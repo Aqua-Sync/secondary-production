@@ -14,10 +14,10 @@ gratton_ep = read_csv("data/e_p_ratios.csv") %>% clean_names() %>%
   filter(type == "Streams")
 
 # ep_model = brm(e_p_ratio ~ 1 + (1|reference) + (1|taxa_measured),
-               # family = Beta(link = "logit"),
-               # data = gratton_ep,
-               # prior = c(prior(exponential(2), class = "sd"),
-                         # prior(Normal(-1.45, 0.5))))
+#                family = Beta(link = "logit"),
+#                data = gratton_ep,
+#                prior = c(prior(exponential(2), class = "sd"),
+#                          prior(normal(-1.45, 0.5), class = "Intercept")))
 # 
 # saveRDS(ep_model, file = "models/ep_model.rds")
 
@@ -80,11 +80,4 @@ emergence_compared_raw_acsp = emergence_production %>%
 ggsave(emergence_compared_raw_acsp, file = "plots/emergence_compared_raw_acsp.jpg",
        width = 5, height = 5, dpi = 400)
 
-emergence_production_with_vars %>% 
-  group_by(empirical_emergence) %>% 
-  tally()
 
-emergence_production_with_vars %>% 
-  group_by(empirical_emergence) %>% 
-  reframe(mean = mean(mean_emergence_mgdmm2y, na.rm = T),
-          sd = sd(mean_emergence_mgdmm2y, na.rm = T))

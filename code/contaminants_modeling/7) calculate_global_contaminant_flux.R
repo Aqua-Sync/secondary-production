@@ -21,6 +21,8 @@ flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rd
   mutate(HYBAS_ID = as.character(HYBAS_ID),
          HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
 
+saveRDS(flux_predictions_all, file = "posteriors/flux_predictions_all.rds")
+
 # contaminant cas numbers and names
 cas_names = readRDS(file = "data/cas_names.rds") %>% 
   mutate(chemical_category = case_when(chemical == "Selenium" ~ "Se",

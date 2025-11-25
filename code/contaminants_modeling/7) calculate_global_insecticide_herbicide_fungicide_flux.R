@@ -12,10 +12,10 @@ contaminants_ides = readRDS(file = "data/contaminants.rds") %>%
 unique(contaminants_ides$chemical)
 
 # load dry mass emergence predictions
-flux_predictions_all = readRDS("posteriors/flux_predictions_all.rds") %>% 
+flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
-         HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
+         HYBAS_L12 = bit64::as.integer64(HYBAS_ID))  
 
 # contaminant cas numbers and names
 cas_names = readRDS(file = "data/cas_names.rds") %>% 

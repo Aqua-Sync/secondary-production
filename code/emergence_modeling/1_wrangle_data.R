@@ -14,7 +14,9 @@ library(janitor)
 secondary_prod_raw = read_excel("data/ACSP_Data_BASIN ATTRIBUTES.xlsx") %>%
   clean_names() %>%
   mutate(id = 1:nrow(.)) %>%
-  select(id, everything())
+  select(id, everything()) %>% 
+  filter(site_id != "Bottger_1975_Kalengo_Stream") %>% 
+  filter(site_id != "Jackson_Fisher_1986") # Filtered after consulting via email with Muehlbauer Oct 2025. These were duplicates
 
 # 2) harmonize units
 secondary_prod_wrangled = secondary_prod_raw %>%

@@ -12,3 +12,8 @@ Based on a very quick scan of the largest lake areas, I'd guess total lentic are
 So to a very rough (and conservative) approximation, 10% of surface freshwater has the potential for mercury bioaccumulation.
 
 Driscoll, C. T., Han, Y. J., Chen, C. Y., Evers, D. C., Lambert, K. F., Holsen, T. M., ... & Munson, R. K. (2007). Mercury contamination in forest and freshwater ecosystems in the northeastern United States. BioScience, 57(1), 17-28.
+
+
+2025-11-24
+- Updated the ACSP_Data to remove 2 duplicates. There are now 309 observations instead of 311
+- Refit models
