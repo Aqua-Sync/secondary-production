@@ -63,9 +63,16 @@ global_predictions_pest_herb_fungicide = lapply(mod_list_ides, get_global_contam
 saveRDS(global_predictions_pest_herb_fungicide, file = "posteriors/global_predictions_pest_herb_fungicide.rds")
 
 # summarize ---------------------------------------------------------------
-global_predictions_pest_herb_fungicide = readRDS(file = "posteriors/global_predictions_pest_herb_fungicide.rds")
+global_predictions_pest_herb_fungicide = bind_rows(readRDS(file = "posteriors/global_predictions_pest_herb_fungicide.rds"))
 
 # Global Annual Metric Tons
-bind_rows(global_predictions_pest_herb_fungicide) %>% 
+global_flux_pesticides = global_predictions_pest_herb_fungicide %>% 
   group_by(chemical) %>% 
-  median_qi(global_flux_MT_peryr)
+  median_qi(global_flux_MT_peryr) %>% 
+  bind_rows(global_predictions_pest_herb_fungicide %>% 
+              group_by(.draw) %>% 
+              reframe(global_flux_MT_peryr = sum(global_flux_MT_peryr)) %>% 
+              median_qi(global_flux_MT_peryr) %>% 
+              mutate(chemical = "Total"))
+
+write_csv(global_flux_pesticides, file = "tables/global_flux_pesticides.csv")

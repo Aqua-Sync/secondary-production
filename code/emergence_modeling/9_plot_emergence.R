@@ -184,8 +184,6 @@ flux_global_plot = flux_region_global %>%
 
 ggsave(flux_global_plot, file = "plots/flux_global_plot.jpg", width = 6, height = 8)
 
-flux_global %>% 
-  median_qi(kgyr_global)
 
 
 

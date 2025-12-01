@@ -15,11 +15,14 @@ contaminants = readRDS(file = "data/contaminants.rds") %>%
                                        chemical_category == "Cd" ~ "Cadmium"
   ))
 
+atlas_slim = readRDS("data/atlas.slim.rds")
+
 # load dry mass emergence predictions
 flux_predictions_all = readRDS("posteriors/hybas_predictions_emergenceDryMass.rds") %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   mutate(HYBAS_ID = as.character(HYBAS_ID),
-         HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) 
+         HYBAS_L12 = bit64::as.integer64(HYBAS_ID)) %>% 
+  filter(HYBAS_ID %in% unique(atlas_slim$HYBAS_ID)) # filter out ice/desert covered hybas
 
 saveRDS(flux_predictions_all, file = "posteriors/flux_predictions_all.rds")
 
@@ -51,16 +54,34 @@ chemicals_we_have = cas_names %>% filter(!is.na(chemical_category)) %>%
 filtered_mod_list = Filter(function(m) m$data2$chemical %in% chemicals_we_have , mod_list)
 
 # 4) Run function on each model. Result is combined biomass and contaminant concentrations for all HYBAS_IDs and their product (total contaminant flux per year)
-global_predictions_metals = lapply(filtered_mod_list, get_global_contaminant_preds) 
+global_predictions_metals = lapply(filtered_mod_list, get_global_contaminant_preds, num_iterations = 600) 
 
 saveRDS(global_predictions_metals, file = "posteriors/global_predictions_metals.rds")
 
 # summarize ---------------------------------------------------------------
 global_predictions_metals = readRDS(file = "posteriors/global_predictions_metals.rds")
 
+total_metals = bind_rows(global_predictions_metals) %>% 
+  group_by(.draw) %>% 
+  reframe(global_flux_MT_peryr = sum(global_flux_MT_peryr)) %>% 
+  median_qi(global_flux_MT_peryr) %>% 
+  mutate(chemical = "Total Metals")
+
 # Global Annual Metric Tons
-bind_rows(global_predictions_metals) %>% 
+global_metal_flux = bind_rows(global_predictions_metals) %>% 
   group_by(chemical) %>% 
-  median_qi(global_flux_MT_peryr)
+  median_qi(global_flux_MT_peryr) %>% 
+  arrange(-global_flux_MT_peryr) %>% 
+  bind_rows(total_metals)
 
+saveRDS(global_metal_flux, file = "tables/global_metal_flux_600iters.rds")
 
+write_csv(global_metal_flux, file = "tables/global_metal_flux_600iters.csv")
+
+essential_flux = bind_rows(global_predictions_metals) %>% 
+  mutate(chemical = case_when(chemical %in% c("Se", "Cu", "Zn") ~ "essential",
+                               TRUE ~ "non-essential")) %>% 
+  group_by(.draw, chemical) %>% 
+  summarize(global_flux_MT_peryr = sum(global_flux_MT_peryr)) %>%
+  group_by(chemical) %>% 
+  median_qi(global_flux_MT_peryr) 

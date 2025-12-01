@@ -45,6 +45,8 @@ get_global_contaminant_preds <- function(mod, num_iterations = 300) {
   kg_flux <- flux_predictions_all %>% 
     select(HYBAS_ID, mean, sd) %>% 
     ungroup() %>% 
+    mutate(sd = case_when(mean == 0 ~ 1,
+                          TRUE ~ sd)) %>% # ensure that flux = 0 when mean = 0 (sd of 0 will return an error, so 1 is a placeholder)
     mutate(kg_flux = sample_gamma(n = 1, mean = mean, sd = sd))
   
   # Initialize list to store sum_mg results
