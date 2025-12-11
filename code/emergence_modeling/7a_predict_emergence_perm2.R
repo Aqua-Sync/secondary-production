@@ -6,12 +6,13 @@ theme_set(theme_default())
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence <- max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
+hybas_filter <- readRDS("data/hybas_filtered.rds")
 
 data_to_predict = readRDS("data/data_to_predict.rds") %>% 
-  filter(SUB_AREA > 0) %>% 
+  filter(HYBAS_ID %in% hybas_filter) %>% 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
-  filter(region_name != "Greenland") %>%
-  left_join(readRDS("data/hybas_covariates.rds") %>% select(HYBAS_ID, LAT, terr_biom))
+  left_join(readRDS("data/hybas_covariates.rds") %>% 
+              select(HYBAS_ID, LAT, terr_biom))
 
 mod = updated_gams[[3]]
 mod_dat = mod$data
@@ -77,7 +78,7 @@ bind_rows(sample_perm2_n) %>%
   scale_y_log10()
 
 
-# sampler_perm2 biome -----------------------------------------------------
+# sample_perm2 biome -----------------------------------------------------
 
 post_mass_nutrients_biome = data_to_predict %>% 
   distinct(precip_s, stream_temp_s, HYBAS_ID, region, terr_biom) %>% 

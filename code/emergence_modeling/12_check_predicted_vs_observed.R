@@ -24,6 +24,14 @@ dm = post_flux_all_peryear_hybas %>%
 
 # combine and plot
 
+rawmod_dat = emergence_production_with_vars %>% 
+  select(HYBAS_ID, raw_kg_perhybas) %>% 
+  left_join(dm)
+
+rawmod_mod = lm(log10(median) ~ log10(raw_kg_perhybas), data = rawmod_dat)
+
+rmod_rsq = round(summary(rawmod_mod)$r.squared, 2)
+
 raw_vs_modeled_emergence_per_hybas = emergence_production_with_vars %>% 
   select(HYBAS_ID, raw_kg_perhybas) %>% 
   left_join(dm) %>% 
@@ -33,13 +41,22 @@ raw_vs_modeled_emergence_per_hybas = emergence_production_with_vars %>%
   scale_x_log10(label = comma, breaks = c(1, 10, 100, 1000, 10000, 100000)) +
   scale_y_log10(label = comma, breaks = c(1, 10, 100, 1000, 10000, 100000),
   limits = c(NA, 100000)) +
-  labs(y = "Raw kgDM/hybas/year",
-       x = "Modeled kgDM/hybas/year") +
-  geom_abline()
+  labs(y = expression("Raw kg hybas"^-1*" yr"^-1," dry mass)"),
+       x = expression("Modeled kg hybas"^-1*" yr"^-1," dry mass)")) +
+  geom_abline() +
+  
+  annotate(
+    geom = "text",
+    x = 10, y = 1e5,
+    label = bquote(R^2 == .(round(rmod_rsq, 2))))
+
+
+raw_vs_modeled_emergence_per_hybas
 
 ggsave(raw_vs_modeled_emergence_per_hybas, file = "plots/raw_vs_modeled_emergence_per_hybas.jpg",
        width = 6.5, height = 6.5)
 
+saveRDS(raw_vs_modeled_emergence_per_hybas, file = "plots/raw_vs_modeled_emergence_per_hybas.rds")
 
 # Get deviations. Are they related to water quality?
 deviations =  emergence_production_with_vars %>% 

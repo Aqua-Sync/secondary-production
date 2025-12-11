@@ -80,7 +80,7 @@ plot_region_perm2 = d %>%
   guides(fill = "none",
          color = "none") +
   labs(y = "",
-       x = expression("Annual Emergence Production (mgDM/m"^2*"/y)")) +
+       x = expression("Annual Emergence Production (mg m"^-2*" yr"^-1*" dry mass)")) +
   # geom_text(data = d_summary, aes(label = center_interval),
   #           nudge_y = 0.2, 
   #           x = 4000,
@@ -93,45 +93,45 @@ ggsave(plot_region_perm2, file = "plots/plot_region_perm2.jpg",
 
 # plot flux per m2 per biome ---------------
 
-d_biome = readRDS(file = "posteriors/post_mass_nutrients_biome.rds") %>% 
-  group_by(terr_biom) %>% 
-  mutate(median_region = median(mgDMm2y, na.rm = T)) %>% 
-  group_by(HYBAS_ID, terr_biom, median_region) %>%
-  median_qi(mgDMm2y)
+post_flux_kgdm_perm2_perhybas = readRDS("posteriors/post_flux_kgdm_perm2_perhybas.rds")
+
+d_biome = post_flux_kgdm_perm2_perhybas %>% 
+  ungroup %>% 
+  left_join(readRDS("data/hybas_covariates.rds")) %>%
+  filter(HYBAS_ID %in% hybas_filter) %>% 
+  group_by(terr_biom) %>%
+  mutate(median_region = median(median, na.rm = T))   %>%
+  filter(terr_biom != "NA") %>% 
+  mutate(mgDMm2y = median)
 
 d_biome_summary = d_biome %>% 
   group_by(terr_biom, median_region) %>% 
   median_qi(mgDMm2y) %>% 
   make_summary_table(center = "mgDMm2y", digits = 0)
 
-
 write_csv(d_biome_summary, file = "tables/biome_perm2.csv")
-
 
 plot_biome_perm2 = d_biome %>% 
   filter(terr_biom != "NA") %>% 
   ggplot(aes(x = mgDMm2y, y = reorder(terr_biom, -median_region))) + 
   stat_density_ridges(aes(fill = as.factor(round(median_region, -2)),
                       # quantile_lines = T,
-                      # quantiles = 2.
                       color = NA)) +
-  # scale_fill_viridis_c(option = "plasma") +
   scale_fill_brewer(type = "div", palette = "RdYlBu", 
                     direction = -1) +
   guides(fill = "none",
          color = "none") +
   labs(y = "",
-       x = expression("Annual Emergence Production (mgDM/m"^2*"/y)")) +
-  # geom_text(data = d_biome_summary, aes(label = center_interval),
-  #           nudge_y = 0.2,
-  #           x = 4000,
-  #           size = 3,
-  #           family = "serif") +
+       x = expression("Annual Emergence Production (mg m"^-2*" yr"^-1*" dry mass)")) +
+  xlim(NA, 5000) +
   NULL
 
 ggsave(plot_biome_perm2, file = "plots/plot_biome_perm2.jpg",
        width = 6.5, height = 6.5, dpi = 400)
 
+d_biome %>% 
+  group_by(terr_biom) %>% 
+  tally()
 
 # plot hydrobasin and global lines --------------------------------------------------------------------
 
@@ -240,8 +240,8 @@ plot_compare_to_salmon = brandt_fig1_data %>% glimpse() %>%
   geom_point(shape = 21, aes(fill = log10(n_flux_annualkg),
                              # color = log(n_flux_annualkg),
                              size = log10(n_flux_annualkg))) +
-  labs(x = "N flux (kg/yr)",
-       y = "P flux (kg/yr)") +
+  labs(x = expression("N flux (kg yr"^-1*")"),
+       y = expression("P flux (kg yr"^-1*")")) +
   scale_x_log10(labels = comma) +
   scale_y_log10(labels = comma) +
   guides(size = "none",
@@ -266,8 +266,8 @@ plot_compare_to_salmon_linearscale = brandt_fig1_data %>%
   geom_point(shape = 21, aes(fill = log10(n_flux_annualkg),
                              # color = log(n_flux_annualkg),
                              size = log10(n_flux_annualkg))) +
-  labs(x = "N flux (kg/yr)",
-       y = "P flux (kg/yr)")  +
+  labs(x = expression("N flux (kg yr"^-1*")"),
+       y = expression("P flux (kg yr"^-1*")")) +
   scale_x_continuous(labels = comma) +
   scale_y_continuous(labels = comma) +
   guides(size = "none",

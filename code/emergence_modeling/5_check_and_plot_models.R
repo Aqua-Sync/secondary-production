@@ -34,7 +34,7 @@ emergence_model_checks = pp_data %>%
         axis.text.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.title.y = element_blank()) +
-  labs(x = "Insect Emergence (mgDM/m2) [scaled to maximum]") +
+  labs(x = expression("Insect Emergence (mgDM m"^-2*") [scaled to maximum]")) +
   guides(alpha = "none")
 
 ggsave(emergence_model_checks, file = "plots/emergence_model_checks.jpg",
@@ -76,8 +76,8 @@ plot_emergence_precip = mod1_posts %>%
   ggplot(aes(x = pre_mm_syr, y = .epred/1000)) +
   stat_lineribbon(alpha = 0.3, color = "white") +
   labs(fill = "Credible Interval",
-       y = bquote("Emergence (gDM" %.% m^-2%.% y^-1 ~")"),
-       x = bquote("Precipitation (mm" %.% basin^-1%.% y^-1~")")) +
+       y = expression("Emergence (gDM m"^-2*" yr"^-1*")"),
+       x = expression("Precipitation (mm basin"^-1*" yr"^-1*")")) +
   geom_point(data = raw_dat, aes(y = mean_emergence_mgdmm2y/1000),
              shape = 1) +
   theme(legend.position = c(0.8, 0.8),
@@ -90,8 +90,8 @@ plot_emergence_precip_nodots = mod1_posts %>%
   ggplot(aes(x = pre_mm_syr, y = .epred/1000)) +
   stat_lineribbon(alpha = 0.3, color = "white") +
   labs(fill = "Credible Interval",
-       y = bquote("Emergence (gDM" %.% m^-2%.% y^-1 ~")"),
-       x = bquote("Precipitation (mm" %.% basin^-1%.% y^-1~")")) +
+       y = expression("Emergence (gDM m"^-2*" yr"^-1*")"),
+       x = expression("Precipitation (mm basin"^-1*" yr"^-1*")")) +
   # geom_point(data = raw_dat, aes(y = mean_emergence_mgdmm2y/1000),
              # shape = 1) +
   ylim(NA, max(raw_dat$mean_emergence_mgdmm2y/1000)) +

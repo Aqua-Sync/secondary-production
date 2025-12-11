@@ -69,18 +69,8 @@ as_draws_df(pufa_mod) %>%
              shape = "|")
 
 
-# re-run with just epa + dha data
-pufa_mod_epadha = update(pufa_mod, newdata = pufa_data %>% filter(chemical == "epa + dha"))
-saveRDS(pufa_mod_epadha, file = "models/pufa_mod_epadha.rds")
+# re-run with just epa + dha data and taxon as varying intercept
 
-# re-run with taxon as varying intercept
-
-pufa_mod_taxon = update(pufa_mod, newdata = pufa_data, 
-                        formula = . ~ (1|pub_name) + (1|taxon))
-
-saveRDS(pufa_mod_taxon, file = "models/pufa_mod_taxon.rds")
-
-### !!!!! this is the model we use
 pufa_mod_taxon_epadha = update(pufa_mod, newdata = pufa_data %>% filter(chemical == "epa + dha"), 
                         formula = . ~ (1|pub_name) + (1|taxon))
 

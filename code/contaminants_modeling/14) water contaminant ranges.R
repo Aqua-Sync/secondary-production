@@ -3,6 +3,7 @@ library(brms)
 library(janitor)
 library(tidybayes)
 library(scales)
+library(ggridges)
 theme_set(theme_default())
 
 # Get ranges of aqueous contaminant concentrations globally and compare to the
@@ -31,9 +32,37 @@ emergence %>%
 
 modeled_water_global_empirical = modeled_water %>% 
   select(water_ug_l_raw, HYBAS_ID, chemical) %>% 
-  mutate(data = "Global Range") %>% 
+  mutate(data = "Hydrobasins with empirical emergence data") %>% 
+  sample_n(1e6) %>% 
   bind_rows(modeled_water_wide %>% 
-              mutate(data = "Range at sites with emergence"))
+              mutate(data = "Hydrobasins globally")) %>% 
+  group_by(chemical) %>% 
+  mutate(median = median(water_ug_l_raw)) %>% 
+  mutate(chem = str_sub(chemical, 1, 25)) %>% 
+  mutate(data = fct_relevel(data, "Hydrobasins with empirical emergence data"))
+  
+
+water_comparisons_densities = modeled_water_global_empirical %>% 
+  ggplot(aes(x = water_ug_l_raw, fill = data, y = reorder(chem, -median),
+             alpha = data)) +
+  geom_density_ridges() +
+  scale_x_log10() +
+  scale_alpha_manual(values = c(1, 0.6)) +
+  scale_fill_manual(values = c("#6060F9", "#FB6262")) +
+  labs(y = "",
+       x = expression("Water Concentration (ug L"^-1*")"),
+       fill = "") +
+  guides(alpha = "none") +
+  theme(legend.position = c(0.745, 1),
+        legend.background = element_rect(fill="white",
+                                         size=1, linetype="solid", 
+                                         color ="white"),
+        legend.text = element_text(size = 8))
+
+
+ggsave(water_comparisons_densities, 
+       file = "plots/water_comparisons_densities.jpg", 
+       dpi = 400, width = 6.5, height = 7)
 
 modeled_water_ranges = modeled_water_global_empirical %>% 
   group_by(chemical, data) %>% 

@@ -68,8 +68,8 @@ emergence_compared_raw_acsp = emergence_production %>%
   geom_jitter(width = 0.2) +
   # scale_y_log10() +
   theme_default() +
-  labs(y = "Annual Emergence Production (gDMm²y)",
-       x = "All Emergence Estimates (n = 311)",
+  labs(y = expression("Annual Emergence Production (mg m"^-2*" yr"^-1*" dry mass)"),
+       x = "All Emergence Estimates",
        color = "Method",
        alpha = "Method") +
   theme(legend.text = element_text(size = 8),

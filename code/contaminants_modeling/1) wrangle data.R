@@ -56,7 +56,9 @@ contaminants_unit_harmonized = contaminants_raw %>%
          chemical = case_when(chemical == "fluopicolid" ~ "fluopicolide",  # matching names in the data with official cas names
                               chemical == "p,p'-ddd" ~ "p,p′-DDD",
                               chemical == "primicarb" ~ "pirimicarb",
-                              TRUE ~ chemical)) 
+                              TRUE ~ chemical)) %>% 
+  mutate(pub_name = case_when(grepl("Silina et al. Emergence ", pub_name) ~ "Silina et al. 2023. Emergence of Amphibious Insects from an Old Beaver Pond",
+                              TRUE ~ pub_name))
 
 
 saveRDS(contaminants_unit_harmonized, file = "data/contaminants.rds")

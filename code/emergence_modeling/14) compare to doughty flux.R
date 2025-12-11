@@ -28,7 +28,7 @@ compare_to_doughty = post_total_all %>%
   # stat_density_ridges(quantile_lines = TRUE, quantiles = 2, aes(y = 0)) +
   stat_halfeye() +
   # geom_vline(xintercept = c(5.6e6,     # P of Anadromous Fish global from Doughty et al. 2016 PNAS
-                            # 6.3e6)) + # P of Sea birds to land via quano global from Doughty et al. 2016 PNAS
+                            # 6.3e6)) + # P of Sea birds to land via guano global from Doughty et al. 2016 PNAS
   geom_segment(aes(x= 5.6e6/1000,
                    xend = 5.6e6/1000,
                    y = 0,
@@ -49,7 +49,7 @@ compare_to_doughty = post_total_all %>%
         axis.title.y = element_blank(),
         axis.ticks.y = element_blank(),
         axis.line.y = element_blank()) +
-  labs(x = "Global P flux per year (metric tons)")
+  labs(x = "Global P export per year (t)")
 
 ggsave(compare_to_doughty, file = "plots/compare_to_doughty.jpg", width = 6, height = 6)  
 

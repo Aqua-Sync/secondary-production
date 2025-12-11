@@ -3,14 +3,15 @@ library(tidybayes)
 library(viridis)
 
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
+# continent = "North America"
+salmon_hybas = readRDS("data/ALL_SALMON_HYBAS-L12.rds") %>% pull(HYBAS_ID)
 
 # 1) load data and models -----------------------------
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
-hybas_filter <- readRDS("data/hybas_filtered.rds")
-data_to_predict_list = readRDS("data/data_to_predict.rds") %>% 
-  filter(HYBAS_ID %in% hybas_filter) %>% 
-  group_by(region) %>% 
-  group_split() # basin-level predictor variables by continent
+data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% 
+  left_join(readRDS("data/hybas_regions.rds")) %>% 
+  filter(HYBAS_ID %in% salmon_hybas) %>% 
+  filter(region_name == continent) %>% group_split() # basin-level predictor variables by continent
 hybas_regions <- readRDS("data/hybas_regions.rds")
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence = max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
@@ -39,8 +40,8 @@ system.time(
   }
 )
 # 
-saveRDS(post_total_region_summary, file = "posteriors/post_total_region_summary.rds")
-# post_total_region_summary = readRDS(file = "posteriors/post_total_region_summary.rds")
+# saveRDS(post_total_region_summary, file = paste0("posteriors/post_total_region_summary", continent, ".rds"))
+# post_total_region_summary = readRDS(file = paste0("posteriors/post_total_region_summary", continent, ".rds"))
 
 # Get total pufa ----------------------------------------------------------
 
@@ -66,8 +67,8 @@ for(i in seq_along(data_to_predict_list)) {
     reframe(sum_kgPUFAyr = sum(kgPUFAhybasyr))
 }
 #
-saveRDS(post_pufatotal_summary, file = "posteriors/post_pufa_summary.rds")
-post_pufatotal_summary = readRDS(file = "posteriors/post_pufa_summary.rds")
+# saveRDS(post_pufatotal_summary, file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
+# post_pufatotal_summary = readRDS(file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
 
 post_total_dm = bind_rows(post_total_region_summary) %>%
   arrange(.draw) %>% 
@@ -103,7 +104,11 @@ post_total_all = bind_rows(post_total_dm,
                            post_total_P,
                            post_total_pufa)
 
-saveRDS(post_total_all, file = "posteriors/post_total_all.rds")
+saveRDS(post_total_all, file = paste0("posteriors/post_total_all_brandt", continent, ".rds"))
+
+post_total_all %>% 
+  group_by(chemical, units) %>% 
+  median_qi(flux)
 
 # From Gratton, an average stream has emergence flux of ~1 gC/m2/yr. Using conversions described in Wesner et al. 2020,
 # that converts to 2000 mgDM/m2/yr. Allen and Pavelsky estimate 773000 km2 of river globally, which is 7.73e+11 m2.
@@ -121,15 +126,16 @@ post_total_all %>%
   scale_x_log10() +
   NULL
 
-post_mass_nutrients_pufa_global = post_total_all %>% 
+post_mass_nutrients_pufa_region = post_total_all %>% 
   group_by(chemical) %>% 
   median_qi(median = flux/1000) %>% 
   mutate(units = "Metric Tons") %>% 
   arrange(-median) %>%
-  mutate(across(where(is.double), ~ round(.x, -3)))
+  mutate(across(where(is.double), ~ round(.x, 1)),
+         region = continent)
 
-write_csv(post_mass_nutrients_pufa_global, 
-          file = "tables/post_emergence_global.csv") 
+write_csv(post_mass_nutrients_pufa_region, 
+          file = paste0("tables/post_emergence_", continent, ".csv"))
 
 # Bar-on estimate that terrestrial arthropods make up 0.2 gigatons of C (compared to 550 gigatons of total earth biomass).
 # We estimate that emerging aquatic insects make up ~0.7 million tons of C. 1 gigaton = 1,000,000,000 metric tons. 0.2 gigatons

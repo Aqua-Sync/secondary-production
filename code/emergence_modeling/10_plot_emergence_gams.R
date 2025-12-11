@@ -38,10 +38,11 @@ precip_emergence_plot = preds_precip %>%
              size = 0.5) +
   scale_fill_brewer(palette = "Greens") +
   # guides(fill = "none") +
-  labs(y = "Annual Emergence Production (gDMm²y)",
-       x = expression("Annual Precipitation (mm/m"^2*"/y)"),
+  labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
+       x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
        fill = "Uncertainty\nInterval",
-       subtitle = "a)") 
+       subtitle = "a)") +
+  theme(legend.position = c(0.8, 0.8))
 
 
 preds_stream_temp = tibble(stream_temp_s = seq(min(data_to_predict$stream_temp_s),
@@ -65,16 +66,21 @@ temp_emergence_plot = preds_stream_temp %>%
   geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000),
              size = 0.5) +
   scale_fill_brewer(palette = "Greens") +
-  # guides(fill = "none") +
-  labs(y = "Annual Emergence Production (gDMm²y)",
+  guides(fill = "none") +
+  labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = "Mean Annual Temperature (\u00b0C)",
        fill = "Uncertainty\nInterval",
        subtitle = "b)") 
 
 library(patchwork)
 
-emergence_two_plots = precip_emergence_plot/temp_emergence_plot + plot_layout(axis_titles = "collect",
-                                                                              guides = "collect")
+emergence_two_plots = precip_emergence_plot/temp_emergence_plot + plot_layout(axis_titles = "collect")
 
 ggsave(emergence_two_plots, file = "plots/emergence_two_plots.jpg", width = 6, height = 6)
+
+
+emergence_prediction = emergence_two_plots | readRDS(file = "plots/raw_vs_modeled_emergence_per_hybas.rds") + 
+  plot_layout(ncol = 2, widths = c(0.8, 0.2))
+
+ggsave(emergence_prediction, file = "plots/emergence_prediction.jpg", width = 9, height = 5, dpi = 400)
 

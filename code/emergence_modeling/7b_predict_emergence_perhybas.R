@@ -6,9 +6,10 @@ library(tidybayes)
 # 1) load data and models -------------------------------------------------
 # load data
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
+hybas_filter <- readRDS("data/hybas_filtered.rds")
 
 data_to_predict = readRDS("data/data_to_predict.rds") %>% 
-  filter(SUB_AREA > 0) 
+  filter(HYBAS_ID %in% hybas_filter)
 
 data_to_predict_list = data_to_predict %>% 
   group_by(region) %>% group_split() # basin-level predictor variables by continent
