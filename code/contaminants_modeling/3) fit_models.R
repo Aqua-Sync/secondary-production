@@ -8,7 +8,7 @@ library(scales)
 # load data
 contaminants = readRDS(file = "data/contaminants.rds")
 
-# standardize data
+# standardize data and split by contaminant
 cont_split = contaminants %>% 
   filter(chemical_category %in% c("Se", "Pb", "Zn", "Hg", "Cu", "Cd",
                                   "insecticide", "fungicide", "herbicide", 
@@ -16,29 +16,47 @@ cont_split = contaminants %>%
   group_by(chemical_category) %>% 
   group_split()
   
-mod_list = list()
+# fit models to each contaminant (un-silence to run)
 
-for(i in 1:length(cont_split)){
-  dat = cont_split[[i]] %>% 
-  mutate(max_y = max(adult_conc_ng_mg_dm,na.rm = T),
-       y_s = adult_conc_ng_mg_dm/max_y,
-       log_water_conc_ugl_01 = log(water_conc_ug_l + 0.001*mean(water_conc_ug_l, na.rm = T)),
-       x_s = scale(log_water_conc_ugl_01))
-  
-  mod_list[[i]] = update(readRDS(file = "models/brm_fung.rds"),
-       newdata = dat,
-       data2 = list(chemical_category = unique(dat$chemical_category),
-                    mean_x = attributes(dat$x_s)[2],
-                    sd_x = attributes(dat$x_s)[3],
-                    max_y = unique(dat$max_y)))
-}
+# mod_list = list()
+# 
+# for(i in 1:length(cont_split)){
+#   dat = cont_split[[i]] %>% 
+#   mutate(max_y = max(adult_conc_ng_mg_dm,na.rm = T),
+#        y_s = adult_conc_ng_mg_dm/max_y,
+#        log_water_conc_ugl_01 = log(water_conc_ug_l + 0.001*mean(water_conc_ug_l, na.rm = T)),
+#        x_s = scale(log_water_conc_ugl_01))
+#   
+#   mod_list[[i]] = update(readRDS(file = "models/brm_fung.rds"),
+#        newdata = dat,
+#        data2 = list(chemical_category = unique(dat$chemical_category),
+#                     mean_x = attributes(dat$x_s)[2],
+#                     sd_x = attributes(dat$x_s)[3],
+#                     max_y = unique(dat$max_y)))
+# }
+# 
+# saveRDS(mod_list, file = "models/mod_list.rds")
 
-saveRDS(mod_list, file = "models/mod_list.rds")
+mod_list = readRDS(file = "models/mod_list.rds")
 
 # number of records we modeled
-nrow(mod_list[[1]]$data)
 
-sum(sapply(mod_list, function(x) nrow(x$data)))
+model_data_all = mod_list %>% 
+  map("data") %>% 
+  bind_rows(.id = "model_id")
+
+# number of distinct data points total
+nrow(distinct(model_data_all))
+
+# number of distinct data points per model
+model_data_all %>% 
+  group_by(model_id) %>% 
+  tally()
+
+# number of distinct publications
+length(unique(model_data_all$pub_name))
+
+
 
 # PUFA --------------------------------------------------------------------
 pufa_data = contaminants %>% filter(chemical_category == "PUFA") %>% 
