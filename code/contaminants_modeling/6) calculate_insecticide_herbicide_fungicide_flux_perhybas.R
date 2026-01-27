@@ -30,7 +30,7 @@ cas_names = readRDS(file = "data/cas_names.rds") %>%
 
 # check to match the chemical and cas id
 ides_wehave = contaminants_ides %>% distinct(chemical, chemical_category) %>% 
-  left_join(cas_names %>% mutate(chemical = str_to_lower(chemical)) %>% select(-chemical_category)) %>% 
+  left_join(cas_names %>% mutate(chemical = str_to_lower(chemical)) %>% dplyr::select(-chemical_category)) %>% 
   filter(!is.na(cas))
 
 # Jakob Wolframs predictions of contaminants. Generated in wrangle_modeled_water.R. It uses water concentrations from Jakob Wolfram on seafile.rlp.net...then reformats.
@@ -44,6 +44,8 @@ modeled_water_ides_mean = modeled_water_ides %>% left_join(ides_wehave %>% disti
   reframe(mean.conc.year = mean(mean.conc.year, na.rm = T),
           mean.det.year = mean(mean.det.year, na.rm = T),
           max.conc.year = max(max.conc.year, na.rm = T))
+
+saveRDS(modeled_water_ides_mean, file = "data/modeled_water_ids_mean.rds")
 
 modeled_water = modeled_water_ides_mean
 
@@ -63,15 +65,15 @@ hybas_predictions_ides = lapply(mod_list_ides, get_hybas_cide_preds)
 
 hybas_predictions_ides_df = bind_rows(hybas_predictions_ides) %>% 
   left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
-              select(HYBAS_ID, SUB_AREA) %>% 
+              dplyr::select(HYBAS_ID, SUB_AREA) %>% 
               mutate(HYBAS_ID = as.character(HYBAS_ID)))
 
 saveRDS(hybas_predictions_ides_df, file = "posteriors/hybas_predictions_pest_herb_fungicide.rds")
 
 hybas_predictions_ides_df_filtered = hybas_predictions_ides_df %>% 
-  select(HYBAS_ID, element, starts_with("chem")) %>% 
+  dplyr::select(HYBAS_ID, element, starts_with("chem")) %>% 
   left_join(readRDS("data/hydrobasin_vars_rssa_short.rds") %>% 
-              select(HYBAS_ID, SUB_AREA, dis_m3_pyr, crp_pc_sse, crp_pc_use) %>% 
+              dplyr::select(HYBAS_ID, SUB_AREA, dis_m3_pyr, crp_pc_sse, crp_pc_use) %>% 
               mutate(HYBAS_ID = as.character(HYBAS_ID))) %>% 
   mutate(chem_flux_mg_year = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year, TRUE ~ 0),
          chem_flux_mg_year_lower95 = case_when(crp_pc_sse >= 5 | crp_pc_use >= 5 ~ chem_flux_mg_year_lower95, TRUE ~ 0),
