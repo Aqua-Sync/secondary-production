@@ -3,11 +3,11 @@ library(janitor)
 
 # get proportion contaminants -----------------------------------------------------
 # 1) load posteriors for each contaminant
-hybas_predictions_mgperyear_fungicide <- readRDS("posteriors/hybas_predictions_mgperyear_fungicide.rds") %>% 
+hybas_predictions_mgperyear_fungicide <- readRDS("posteriors/hybas_predictions_mgperyear_filtered_fungicide.rds") %>% 
   select(HYBAS_ID, starts_with("chem_flux"), element)
-hybas_predictions_mgperyear_herbicide <- readRDS("posteriors/hybas_predictions_mgperyear_herbicide.rds") %>% 
+hybas_predictions_mgperyear_herbicide <- readRDS("posteriors/hybas_predictions_mgperyear_filtered_herbicide.rds") %>% 
   select(HYBAS_ID, starts_with("chem_flux"), element)
-hybas_predictions_mgperyear_insecticide <- readRDS("posteriors/hybas_predictions_mgperyear_insecticide.rds") %>% 
+hybas_predictions_mgperyear_insecticide <- readRDS("posteriors/hybas_predictions_mgperyear_filtered_insecticide.rds") %>% 
   select(HYBAS_ID, starts_with("chem_flux"), element)
 hybas_predictions_metals <- readRDS("posteriors/hybas_predictions_metals.rds") %>% 
   select(HYBAS_ID, starts_with("chem_flux"), element) %>% 

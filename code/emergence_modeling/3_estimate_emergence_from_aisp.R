@@ -2,7 +2,9 @@ library(brms)
 library(tidyverse)
 library(janitor)
 
-# Estimate emergence from secondary production using e:p ratios
+# Convert insect secondary production to emergence production using e:p ratios
+# ~2 seconds to 5 minutes (depending on need to compile models)
+
 # 1) load data
 secondary_prod_sd = readRDS(file = "data/secondary_prod_sd.rds") %>% 
   mutate(lat = parse_number(as.character(lat)),
@@ -47,8 +49,7 @@ emergence = secondary_prod_sd %>%
 emergence_production = secondary_prod_sd %>% 
   left_join(emergence) %>% 
   mutate(empirical_emergence = case_when(is.na(emerg) ~ "no", 
-                                         TRUE ~ "yes")) %>% 
-  filter(!grepl("Moio_2017", site_id)) # delete b/c it was estimated from just a few days of the year
+                                         TRUE ~ "yes")) 
 
 write_csv(emergence_production, file = "data/emergence_production.csv")
 

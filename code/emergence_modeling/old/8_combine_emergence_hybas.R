@@ -1,5 +1,9 @@
+##### Feb 2026 I think this code is obsolete - Delete? ######
+
+
 library(tidyverse)
 library(tidybayes)
+library(data.table)
 
 # load data
 data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
@@ -7,7 +11,7 @@ data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) 
 # load flux summaries -----------------------------------------------------
 
 # List all files that start with "flux_predictionstest"
-flux_files <- list.files("posteriors", pattern = "^flux_predictionstest", full.names = TRUE)
+flux_files <- list.files("posteriors", pattern = "^hybas_predictionstest", full.names = TRUE)
 
 # Load each file into a list
 flux_list <- lapply(flux_files, readRDS)
@@ -26,8 +30,6 @@ saveRDS(flux_predictions, file = "posteriors/flux_predictions_all.rds")
 
 flux_predictions = readRDS(file = "posteriors/flux_predictions_all.rds")
 
-flux_predictions %>%
-  reframe(kgDMperyr = sum(median))
 
 # load flux posteriors ----------------------------------------------------
 
@@ -53,15 +55,15 @@ flux_global = bind_rows(flux_posterior_list)  %>%
 
 saveRDS(flux_global, file = "posteriors/flux_global.rds")
 
-# flux_region_list = NULL
-# for(i in 1:length(flux_posterior_list)){
-#   flux_region_list[[i]] = flux_posterior_list[[i]] %>% 
-#     group_by(.draw) %>% 
-#     reframe(kgyr_global = sum(kgdmhybasyr),
-#             region = i)
-# }
-# flux_region = bind_rows(flux_region_list)
-# 
-# saveRDS(flux_region, file = "posteriors/flux_region.rds")
+flux_region_list = NULL
+for(i in 1:length(flux_posterior_list)){
+  flux_region_list[[i]] = flux_posterior_list[[i]] %>%
+    group_by(.draw) %>%
+    reframe(kgyr_global = sum(kgdmhybasyr),
+            region = i)
+}
+flux_region = bind_rows(flux_region_list)
+
+saveRDS(flux_region, file = "posteriors/flux_region.rds")
 
 

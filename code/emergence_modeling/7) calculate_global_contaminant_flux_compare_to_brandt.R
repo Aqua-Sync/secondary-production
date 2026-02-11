@@ -3,7 +3,7 @@ library(tidybayes)
 library(viridis)
 
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
-# continent = "North America"
+continent = "North America"
 salmon_hybas = readRDS("data/ALL_SALMON_HYBAS-L12.rds") %>% pull(HYBAS_ID)
 
 # 1) load data and models -----------------------------

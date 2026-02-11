@@ -1,6 +1,7 @@
 library(tidyverse)
 library(brms)
 library(tidybayes)
+library(ggridges)
 theme_set(theme_default())
 
 make_summary_table <- function(df, center = ".epred", lower = ".lower", upper = ".upper",
@@ -29,7 +30,7 @@ hybas_contaminant_predictions = readRDS(file = "posteriors/hybas_predictions_met
   left_join(readRDS("data/hybas_regions.rds")) 
 
 
-# biomess --------------------------------------------------------------
+# biomes --------------------------------------------------------------
 
 d_region_contaminants = hybas_contaminant_predictions %>% 
   group_by(terr_biom, element) %>% 

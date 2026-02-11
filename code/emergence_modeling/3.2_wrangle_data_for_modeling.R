@@ -4,15 +4,16 @@ library(janitor)
 library(tidybayes)
 library(scales)
 
-# get data read for regression GAM models. Add predictors to emergence data
+# transform and/or standardize predictors.
+# result is the raw data to be used in regression models predicting annual insect emergence production
 
-source('code/custom_functions/estimate_streamtemp.R')
+source('code/custom_functions/estimate_streamtemp.R') # this converts air temperature to stream temperatures using a published equation
 
 # load data ---------------------
 emergence_production = read_csv(file = "data/emergence_production.csv") %>% 
   separate(site_id, into = c("author", "author2"), extra = "merge") %>% 
   mutate(year = parse_number(author2)) %>% 
-  mutate(author_year = paste(author, year, sep = "_")) %>% glimpse %>% 
+  mutate(author_year = paste(author, year, sep = "_")) %>% 
   mutate(tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C
          pre_cm_syr1000 = pre_mm_syr/1000,
          # precip_s = scale(pre_mm_syr),
@@ -38,6 +39,8 @@ emergence_production_with_vars = emergence_production %>%
   mutate(HYBAS_ID = hybas_id) 
 
 saveRDS(emergence_production_with_vars, file = 'data/emergence_production_with_vars.rds')
+
+rm(emergence_production)
 
 
 

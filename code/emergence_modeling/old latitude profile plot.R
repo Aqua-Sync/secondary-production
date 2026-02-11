@@ -10,12 +10,14 @@ d = readRDS("posteriors/post_flux_kgdm_perm2_perhybas.rds") %>%
   group_by(region_name) %>% 
   mutate(median_region = median(median, na.rm = T)) %>% 
   ungroup
-hybas_covariates = readRDS("data/hybas_covariates.rds")
+hybas_covariates = readRDS("data/hybas_covariates.rds") %>% 
+  mutate(lat = LAT)
 
 
 latitude_profile <- d %>%
   left_join(hybas_covariates) %>% 
   group_by(terr_biom) %>% 
+  filter(!is.na(terr_biom)) %>% 
   mutate(bin_index = cut_interval(lat, 1000, labels = FALSE)) %>% # create 1000 bins per biome
   group_by(bin_index, terr_biom) %>%
   mutate(lat = min(lat, na.rm = T)) %>% 

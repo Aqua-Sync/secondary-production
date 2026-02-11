@@ -112,26 +112,3 @@ rel_impo_table = bind_rows(lmg_list) %>%
 write_csv(rel_impo_table, file = "tables/rel_impo_table.csv")
 
 
-
-bind_rows(lmg_list) %>% 
-  filter(term == "water_conc_s") %>% 
-  ggplot(aes(x = chemical, y = estimate, color = term)) + 
-  geom_point()
-
-# how many basins have 0 concentration in the water
-
-contaminants_filtered %>% 
-  mutate(n_basins = length(ids)) %>% 
-  group_by(element, n_basins) %>% 
-  reframe(zeros = sum(is.na(mean.conc.year))) %>% 
-  mutate(prop_zeros = zeros/n_basins) %>% 
-  arrange(prop_zeros)
-
-
-
-contaminants_filtered_s %>% 
-  # filter(mean.conc.year > 0) %>% 
-  filter(element == "insecticide") %>% View()
-  sample_n(1000) %>% 
-  ggplot(aes(x = biomass_flux_s, y = chem_flux_s)) + 
-  geom_point(shape = ".")

@@ -78,10 +78,12 @@ saveRDS(global_metal_flux, file = "tables/global_metal_flux_600iters.rds")
 
 write_csv(global_metal_flux, file = "tables/global_metal_flux_600iters.csv")
 
-essential_flux = bind_rows(global_predictions_metals) %>% 
+essential_vs_nonessential_flux = bind_rows(global_predictions_metals) %>% 
   mutate(chemical = case_when(chemical %in% c("Se", "Cu", "Zn") ~ "essential",
                                TRUE ~ "non-essential")) %>% 
   group_by(.draw, chemical) %>% 
   summarize(global_flux_MT_peryr = sum(global_flux_MT_peryr)) %>%
   group_by(chemical) %>% 
   median_qi(global_flux_MT_peryr) 
+
+write_csv(essential_vs_nonessential_flux, file = "tables/essential_vs_nonessential_flux.csv")

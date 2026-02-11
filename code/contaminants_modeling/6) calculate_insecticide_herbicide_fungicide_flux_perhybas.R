@@ -98,7 +98,7 @@ lapply(names(split_data_ides), function(element) {
 })
 
 # summarize ---------------------------------------------------------------
-hybas_predictions_ides = readRDS(file = "posteriors/hybas_predictions_ides.rds")
+hybas_predictions_ides = readRDS(file = "posteriors/hybas_predictions_pest_herb_fungicide_filtered.rds")
 
 # Global Annual Metric Tons
 bind_rows(hybas_predictions_ides) %>% 
@@ -109,18 +109,3 @@ bind_rows(hybas_predictions_ides) %>%
 all_ids = bind_rows(hybas_predictions_ides) 
 
 raw_model_data = lapply(mod_list_ides, function(mod) mod$data)
-
-
-all_ids %>%
-  group_by(chemical_category) %>% 
-  sample_n(1000) %>%
-  filter(x_s == min(x_s, na.rm = T)|x_s == max(x_s, na.rm = T)) %>%
-  ggplot(aes(x = x_s, y = y_s)) +
-  geom_lineribbon(alpha = 0.3, aes(ymin = y_s_lower95, ymax = y_s_upper95)) +
-  facet_wrap(~chemical_category, scales = "free_y") +
-  geom_point(data = bind_rows(raw_model_data), aes(y = y_s, x = x_s)) +
-  # scale_x_log10() +
-  # scale_y_log10() +
-  NULL
-
-plot(conditional_effects(mod_list_ides[[1]]), points = T)

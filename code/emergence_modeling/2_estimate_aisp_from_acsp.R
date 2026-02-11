@@ -1,6 +1,13 @@
 library(brms)
 library(tidyverse)
 library(janitor)
+library(readxl)
+
+# convert all production data to insect only secondary production (i.e., aisp)
+# Some data are already presented as insects only. those stay the same
+# Other data are presented as total community production. We use models of the insect/community biomass ratio and then estimate the proportion
+# of insects from the raw data to convert to aisp.
+# ~20 seconds to 5 minutes (depending on need to compile models)
 
 # 1) load data
 # acsp = aquatic community secondary production (insects and non-insects)
@@ -29,6 +36,8 @@ gratton_fi = read_excel("data/gratton_supplement_A.xlsx") %>%
 
 # 4) fit model
 # Estimates fi: beta model estimating the proportion of insects in total secondary production
+# full model directly below is silenced to avoid recompiling. Instead, we use "update(..." to
+# go straight to sampling
 
 # brm_prop_insects_beta = brm(prop ~ 1, 
 #                             family = Beta(link = "logit"),
@@ -36,9 +45,9 @@ gratton_fi = read_excel("data/gratton_supplement_A.xlsx") %>%
 #                             prior = c(prior(normal(0.66, 0.07), class = "Intercept")))
 
 # saveRDS(brm_prop_insects_beta, file = "models/brm_prop_insects_beta.rds")
-# brm_prop_insects_beta = update(readRDS(file = "models/brm_prop_insects_beta.rds"),
-                               # newdata = dat_aispacsp)
-# saveRDS(brm_prop_insects_beta, file = "models/brm_prop_insects_beta.rds")
+brm_prop_insects_beta = update(readRDS(file = "models/brm_prop_insects_beta.rds"),
+                               newdata = dat_aispacsp)
+saveRDS(brm_prop_insects_beta, file = "models/brm_prop_insects_beta.rds")
 
 # 5) get posteriors of proportion of insects
 brm_prop_insects_beta = readRDS("models/brm_prop_insects_beta.rds")

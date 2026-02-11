@@ -1,6 +1,8 @@
 library(tidyverse)
 library(readxl)
 library(janitor)
+# wrangle data for fitting models in subsequent scripts
+# ~5 seconds
 
 # 1) load data that were downloaded from here: https://niva365.sharepoint.com/:x:/r/sites/int_AquaSYNC-SWG002-StefanoLarsenchair/_layouts/15/Doc.aspx?sourcedoc=%7BA504FDE8-388D-4601-8E35-C3D504F74D4D%7D&file=ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V2.1.csv&action=default&mobileredirect=true
 
@@ -11,12 +13,10 @@ library(janitor)
 #   select(id, everything()) 
 
 # these data are with basin-wide predictors
-secondary_prod_raw = read_excel("data/ACSP_Data_BASIN ATTRIBUTES.xlsx") %>%
+secondary_prod_raw = read_csv("data/ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv") %>%
   clean_names() %>%
   mutate(id = 1:nrow(.)) %>%
-  select(id, everything()) %>% 
-  filter(site_id != "Bottger_1975_Kalengo_Stream") %>% 
-  filter(site_id != "Jackson_Fisher_1986") # Filtered after consulting via email with Muehlbauer Oct 2025. These were duplicates
+  select(id, everything()) 
 
 # 2) harmonize units
 secondary_prod_wrangled = secondary_prod_raw %>%
@@ -66,3 +66,12 @@ secondary_prod %>% glimpse() %>%
   filter(!is.na(value)) %>% 
   distinct(id) %>% 
   tally()
+
+
+# compare with previous version (should be very close...mostly just some deletions of duplicates during QA in early 2026)
+old_secondary_prod = read_csv("data/old/secondary_prod.csv")
+
+bind_rows(secondary_prod %>% mutate(data = "new"),
+          old_secondary_prod %>% mutate(data = "old")) %>% 
+  ggplot(aes(x = data, y = acsp)) +
+  geom_jitter(width = 0.1, height = 0) 

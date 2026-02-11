@@ -35,7 +35,8 @@ system.time(
       mutate(.epred = .epred*max_emergence)%>%
       mutate(kgdmhybasyr = (.epred*(area.redist*1e6))/1e6) %>% # convert water area to m2. Multiply by mg/m2. It yields mg/hybas. Then divide by 1e6 to get kg/hybas
       group_by(.draw, region_name) %>%
-      reframe(sum_kgdmyr = sum(kgdmhybasyr))
+      reframe(flux = sum(kgdmhybasyr)) %>% 
+      mutate(units = "kg_per_y_per_hybas")
   }
 )
 # 
