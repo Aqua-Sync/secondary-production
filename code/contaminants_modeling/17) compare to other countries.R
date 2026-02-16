@@ -2,6 +2,8 @@ library(tidyverse)
 library(tidybayes)
 library(ggridges)
 library(ggrepel)
+library(brms)
+theme_set(brms::theme_default())
 
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
 
@@ -57,21 +59,21 @@ max_emergence = max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm
 # dry mass
 
 # estimates median and CrI's of emergence per hybas in standardized units of mgdmm2y/max(mgdmm2y)
-# post_summary_bycountry = vector("list", length(data_to_predict_list))
+post_summary_bycountry = vector("list", length(data_to_predict_list))
 # 
-# for(i in seq_along(data_to_predict_list)) {
-#   post_summary_bycountry[[i]] = data_to_predict_list[[i]] %>%
-#     # slice(1:5) %>%
-#     select(HYBAS_ID, precip_s, stream_temp_s, area.redist, gad_id_smj, country, country_region) %>%
-#     mutate(author_year = "new") %>%
-#     add_epred_draws(updated_gams[[3]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 100) %>%
-#     mutate(kgdmkm2y = .epred*max_emergence,
-#            kgdmhybasyr = kgdmkm2y*area.redist) %>% 
-#     group_by(country_region, .draw) %>%
-#     reframe(.epred = sum(kgdmhybasyr))
-# }
-# 
-# saveRDS(bind_rows(post_summary_bycountry), file = "posteriors/post_summary_bycountry.rds")
+for(i in seq_along(data_to_predict_list)) {
+  post_summary_bycountry[[i]] = data_to_predict_list[[i]] %>%
+    # slice(1:5) %>%
+    select(HYBAS_ID, precip_s, stream_temp_s, area.redist, gad_id_smj, country, country_region) %>%
+    mutate(author_year = "new") %>%
+    add_epred_draws(updated_gams[[3]], allow_new_levels = TRUE, re_formula = NULL, ndraws = 100) %>%
+    mutate(kgdmkm2y = .epred*max_emergence,
+           kgdmhybasyr = kgdmkm2y*area.redist) %>%
+    group_by(country_region, .draw) %>%
+    reframe(.epred = sum(kgdmhybasyr))
+}
+
+saveRDS(bind_rows(post_summary_bycountry), file = "posteriors/post_summary_bycountry.rds")
 
 post_summary_bycountry = readRDS(file = "posteriors/post_summary_bycountry.rds")
 
@@ -100,11 +102,11 @@ compare_flux_per_country = post_np %>%
         axis.ticks.y = element_blank(),
         axis.line.y = element_blank()) +
   guides(fill = "none") +
-  geom_text_repel(data = literature_comparisons, aes(label = organism, y = 0),
+  geom_text_repel(data = literature_comparisons %>% filter(country_region != "North America"), aes(label = organism, y = 0),
                    size = 2.5,
                   nudge_x = -2,
                   nudge_y = 0.5) +
   labs(x = "Kilograms per year") 
 
-ggsave(compare_flux_per_country, file = "plots/compare_flux_per_country.jpg", width = )
+ggsave(compare_flux_per_country, file = "plots/compare_flux_per_country.jpg", width = 6.5, height = 9)
 write_csv(median, file = "tables/median_flux_per_country.csv")

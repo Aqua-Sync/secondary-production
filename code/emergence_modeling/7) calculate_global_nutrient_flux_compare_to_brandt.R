@@ -4,6 +4,7 @@ library(viridis)
 
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
 continent = "North America"
+# filter to just the HYBAS included in Pacific Drainages to compare to Brandt
 salmon_hybas = readRDS("data/ALL_SALMON_HYBAS-L12.rds") %>% pull(HYBAS_ID)
 
 # 1) load data and models -----------------------------
@@ -67,8 +68,8 @@ for(i in seq_along(data_to_predict_list)) {
     reframe(sum_kgPUFAyr = sum(kgPUFAhybasyr))
 }
 #
-# saveRDS(post_pufatotal_summary, file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
-# post_pufatotal_summary = readRDS(file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
+saveRDS(post_pufatotal_summary, file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
+post_pufatotal_summary = readRDS(file = paste0("posteriors/post_pufa_summary", continent, ".rds"))
 
 post_total_dm = bind_rows(post_total_region_summary) %>%
   arrange(.draw) %>% 
@@ -106,9 +107,16 @@ post_total_all = bind_rows(post_total_dm,
 
 saveRDS(post_total_all, file = paste0("posteriors/post_total_all_brandt", continent, ".rds"))
 
-post_total_all %>% 
+post_total_all = post_total_all %>% 
   group_by(chemical, units) %>% 
-  median_qi(flux)
+  median_qi(flux) %>% 
+  mutate(units = "kg_per_y_western_north_america",
+         notes = "only drainages to the Pacific. Compare with Brandt et al. fluxes")
+
+write_csv(post_total_all, file = "tables/compare_nutrients_to_brandt.csv")
+
+
+
 
 # From Gratton, an average stream has emergence flux of ~1 gC/m2/yr. Using conversions described in Wesner et al. 2020,
 # that converts to 2000 mgDM/m2/yr. Allen and Pavelsky estimate 773000 km2 of river globally, which is 7.73e+11 m2.

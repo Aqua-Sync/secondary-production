@@ -16,6 +16,8 @@ cont_split = contaminants %>%
   group_by(chemical_category) %>% 
   group_split()
   
+
+
 # fit models to each contaminant (un-silence to run)
 
 # mod_list = list()

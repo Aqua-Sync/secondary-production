@@ -6,6 +6,8 @@ library(scales)
 
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
 
+length(unique(emergence_production_with_vars$author_year))
+
 mean_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:center`
 sd_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:scale`
 

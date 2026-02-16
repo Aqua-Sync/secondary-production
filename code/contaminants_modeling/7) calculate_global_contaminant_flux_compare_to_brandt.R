@@ -5,7 +5,9 @@ library(bit64)
 library(cccapi)
 
 # continent = "North America"
+# filter to just the HYBAS included in Pacific Drainages to compare to Brandt
 salmon_hybas = readRDS("data/ALL_SALMON_HYBAS-L12.rds") %>% pull(HYBAS_ID)
+
 
 # load data and models
 # raw contaminants data
@@ -65,8 +67,11 @@ saveRDS(global_predictions_metals, file = paste0("posteriors/global_predictions_
 global_predictions_metals = readRDS(file = paste0("posteriors/global_predictions_metals_compare_to_brandt",".rds"))
 
 # Global Annual Metric Tons
-bind_rows(global_predictions_metals) %>% 
+compare_contaminants_to_brandt = bind_rows(global_predictions_metals) %>% 
   group_by(chemical) %>% 
-  median_qi(global_flux_MT_peryr)
+  median_qi(global_flux_MT_peryr) %>% 
+  mutate(units = "MT_per_y_western_north_america",
+         notes = "only drainages to the Pacific. Compare with Brandt et al. fluxes")
 
+write_csv(compare_contaminants_to_brandt, file = "tables/compare_contaminants_to_brandt.csv")
 
