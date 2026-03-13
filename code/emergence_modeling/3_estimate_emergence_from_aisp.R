@@ -1,6 +1,7 @@
 library(brms)
 library(tidyverse)
 library(janitor)
+library(ggthemes)
 
 # Convert insect secondary production to emergence production using e:p ratios
 # ~2 seconds to 5 minutes (depending on need to compile models)
@@ -55,13 +56,40 @@ write_csv(emergence_production, file = "data/emergence_production.csv")
 
 # 5) plot
 
-emergence_production = read_csv(file = "data/emergence_production.csv")
-
-emergence_compared_raw_acsp = emergence_production %>% 
+emergence_production = read_csv(file = "data/emergence_production.csv") %>% 
   mutate(source = case_when(empirical_emergence == "no" ~ "Converted from ACSP",
                             TRUE ~ "Directly Measured")) %>% 
-  arrange(mean_emergence_mgdmm2y) %>% 
-  mutate(rank = 1:nrow(.)) %>% 
+  arrange(mean_emergence_mgdmm2y) 
+
+
+# make three data source: all data, converted only, and emergence only. then plot to show comparison
+# this is to address a reviewer comment that a single category on the x-axis is confusing (which we agree)
+
+emer = bind_rows(emergence_production %>% mutate(grouping = "All Data"),
+                 emergence_production %>% filter(source == "Directly Measured") %>% mutate(grouping = "Directly Measured"),
+                 emergence_production %>% filter(source != "Directly Measured") %>% mutate(grouping = "Converted from ACSP")) %>% 
+  mutate(jitter_offset = rnorm(nrow(.), 0, 0.1))
+
+emergence_compared_raw_acsp_revised = emer %>% 
+  ggplot(aes(x = grouping, y = mean_emergence_mgdmm2y)) +
+  geom_jitter(width = 0.05, height = 0, aes(color = source,
+                               alpha = source)) +
+  scale_color_colorblind() +
+  theme_default() +
+  labs(y = expression("Annual Insect Emergence Production (mgDM m"^-2*" yr"^-1*")"),
+       x = "") +
+  scale_alpha_manual(values = c(0.2, 0.8)) +
+  theme(legend.text = element_text(size = 8),
+        legend.position = "top",
+        legend.title = element_blank()) +
+  NULL
+
+ggsave(emergence_compared_raw_acsp_revised , file = "plots/emergence_compared_raw_acsp_revised .jpg",
+       width = 6, height = 5, dpi = 400)
+
+
+
+emergence_compared_raw_acsp = emergence_production %>% 
   ggplot(aes(y = mean_emergence_mgdmm2y,
              color = source,
              alpha = source,

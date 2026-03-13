@@ -1,16 +1,24 @@
 library(tidyverse)
 library(brms)
 library(tidybayes)
+library(patchwork)
+library(cowplot)
 theme_set(theme_default())
 
-emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
+emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds') %>% 
+  mutate(source = case_when(empirical_emergence == "no" ~ "Converted from ACSP",
+                            TRUE ~ "Directly Measured")) %>% 
+  filter(!is.na(emerge_1))
+
 updated_gams = readRDS("models/updated_gams.rds")
 max_emergence <- max(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
 
 d = emergence_production_with_vars
+
 mod_dat = updated_gams[[3]]$data %>% 
   mutate(precip_raw = (precip_s*attributes(d$precip_s)[[3]]) + attributes(d$precip_s)[[2]]) %>% 
-  mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) 
+  mutate(stream_temp = (stream_temp_s*attributes(d$stream_temp_s)[[3]]) + attributes(d$stream_temp_s)[[2]]) %>% 
+  left_join(emergence_production_with_vars %>% ungroup %>% distinct(author_year, source, emerge_1))
 
 data_to_predict = readRDS("data/data_to_predict.rds") # abiotic variables for all 1 million HYBAS
 
@@ -77,10 +85,57 @@ library(patchwork)
 emergence_two_plots = precip_emergence_plot/temp_emergence_plot + plot_layout(axis_titles = "collect")
 
 ggsave(emergence_two_plots, file = "plots/emergence_two_plots.jpg", width = 6, height = 6)
+raw_v_modeled = readRDS(file = "plots/raw_vs_modeled_emergence_per_hybas.rds") + labs(subtitle = "c)")
 
-
-emergence_prediction = emergence_two_plots | readRDS(file = "plots/raw_vs_modeled_emergence_per_hybas.rds") + 
+emergence_prediction = emergence_two_plots | raw_v_modeled + 
   plot_layout(ncol = 2, widths = c(0.8, 0.2))
 
 ggsave(emergence_prediction, file = "plots/emergence_prediction.jpg", width = 9, height = 5, dpi = 400)
 
+# show raw data with id's for directly measured emergence vs converted from ACSP
+
+
+a_dir_conv = preds_precip %>% 
+  ggplot(aes(x = precip_raw, y = (.epred*max_emergence)/1000)) +
+  # stat_lineribbon(alpha = 0.25) +
+  # stat_lineribbon(data = . %>% filter(outside_inside == "inside")) +
+  geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, 
+                                 color = source,
+                                 alpha = source),
+             size = 0.5) +
+  scale_fill_brewer(palette = "Greens") +
+  scale_color_colorblind() +
+  scale_alpha_manual(values = c(0.3, 0.9)) +
+  guides(alpha = "none") +
+  labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
+       x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
+       fill = "Uncertainty\nInterval",
+       subtitle = "a)",
+       color = "") +
+  NULL
+
+b_dir_conv = preds_stream_temp %>% 
+  ggplot(aes(x = stream_temp, y = (.epred*max_emergence)/1000)) +
+  # stat_lineribbon(alpha = 0.25) +
+  # stat_lineribbon(data = . %>% filter(outside_inside == "inside")) +
+  geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, color = source,
+                                 alpha = source),
+             size = 0.5) +
+  scale_fill_brewer(palette = "Greens") +
+  scale_color_colorblind() +
+  scale_alpha_manual(values = c(0.3, 0.9)) +
+  guides(alpha = "none") +
+  labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
+       x = "Mean Annual Temperature (\u00b0C)",
+       fill = "Uncertainty\nInterval",
+       subtitle = "b)",
+       color = "") +
+  # theme(legend.position = "top") +
+  NULL
+
+compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(guides = "collect", 
+                                    axis_titles = "collect") & theme(legend.position = 'top',
+                                                                     text = element_text(size = 9),
+                                                                     legend.text = element_text(size = 8))
+
+ggsave(compare_measures_plot, file = "plots/compare_measures_plot.jpg", width = 5, height = 6)

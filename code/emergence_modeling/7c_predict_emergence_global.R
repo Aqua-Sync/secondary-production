@@ -41,7 +41,7 @@ system.time(
 )
 # 
 saveRDS(post_total_region_summary, file = "posteriors/post_total_region_summary.rds")
-# post_total_region_summary = readRDS(file = "posteriors/post_total_region_summary.rds")
+post_total_region_summary = readRDS(file = "posteriors/post_total_region_summary.rds")
 
 # Get total pufa ----------------------------------------------------------
 
@@ -73,7 +73,7 @@ post_pufatotal_summary = readRDS(file = "posteriors/post_pufa_summary.rds")
 post_total_dm = bind_rows(post_total_region_summary) %>%
   arrange(.draw) %>% 
   group_by(.draw) %>% 
-  reframe(flux = sum(sum_kgdmyr),
+  reframe(flux = sum(flux),
           chemical = "dm",
           units = "kg_per_y_global")
 

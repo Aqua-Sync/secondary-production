@@ -18,6 +18,7 @@ make_summary_table <- function(df, center = ".epred", lower = ".lower", upper = 
 
 # load data
 data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) %>% group_split()
+hybas_filter <- readRDS("data/hybas_filtered.rds")
 
 # get regions from here: https://developers.google.com/earth-engine/datasets/catalog/WWF_HydroATLAS_v1_Basins_level12#table-schema
 regions = tibble(region_name = c("Africa",
@@ -119,11 +120,11 @@ write_csv(d_biome_summary, file = "tables/biome_perm2.csv")
 plot_biome_perm2 = d_biome %>% 
   filter(terr_biom != "NA") %>% 
   ggplot(aes(x = mgDMm2y, y = reorder(terr_biom, -median_region))) + 
-  stat_density_ridges(aes(fill = as.factor(round(median_region, -2)),
-                      # quantile_lines = T,
-                      color = NA)) +
-  scale_fill_brewer(type = "div", palette = "RdYlBu", 
-                    direction = -1) +
+  stat_density_ridges(aes(fill = as.factor(round(median_region, -2)))) +
+  # scale_fill_brewer(type = "div", palette = "RdYlBu", 
+  #                   direction = -1) +
+  # scale_fill_brewer() +
+  scale_fill_grey(start = 0.8, end = 0.2) +
   guides(fill = "none",
          color = "none") +
   labs(y = "",
