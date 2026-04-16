@@ -1,0 +1,5 @@
+chemical,global_flux_MT_peryr,.lower,.upper,.width,.point,.interval
+fungicide,0.003,0.001,0.012,0.95,median,qi
+herbicide,0.086,0.014,0.421,0.95,median,qi
+insecticide,0.009,0.002,0.037,0.95,median,qi
+Total,0.102,0.023,0.438,0.95,median,qi

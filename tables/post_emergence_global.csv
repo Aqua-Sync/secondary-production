@@ -1,6 +1,6 @@
 chemical,median,.lower,.upper,.width,.point,.interval,units
-dm,2820000,2517000,3262000,0,median,qi,Metric Tons
-C,1269000,1133000,1468000,0,median,qi,Metric Tons
-N,201000,180000,233000,0,median,qi,Metric Tons
-PUFA,32000,14000,94000,0,median,qi,Metric Tons
-P,10000,9000,12000,0,median,qi,Metric Tons
+dm,1820000,1232000,3160000,0,median,qi,Metric Tons
+C,819000,555000,1422000,0,median,qi,Metric Tons
+N,130000,88000,226000,0,median,qi,Metric Tons
+PUFA,17000,4000,69000,0,median,qi,Metric Tons
+P,7000,4000,11000,0,median,qi,Metric Tons

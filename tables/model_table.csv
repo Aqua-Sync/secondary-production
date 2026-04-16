@@ -1,0 +1,16 @@
+model_number,formula
+1,emerge_1 ~ s(precip_s) + (1 | author_year) + (1 | HYBAS_ID)
+2,emerge_1 ~ s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)
+3,"emerge_1 ~ s(precip_s, stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)"
+4,emerge_1 ~ (1 | author_year) + (1 | HYBAS_ID)
+5,emerge_1 ~ s(precip_s) + s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)
+6,emerge_1 ~ s(hft_ix_s93_s) + (1 | author_year) + (1 | HYBAS_ID)
+7,emerge_1 ~ s(hft_ix_u93_s) + (1 | author_year) + (1 | HYBAS_ID)
+8,emerge_1 ~ s(hft_ix_s09_s) + (1 | author_year) + (1 | HYBAS_ID)
+9,emerge_1 ~ s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID)
+10,emerge_1 ~ s(ele_mt_sav_s) + (1 | author_year) + (1 | HYBAS_ID)
+11,emerge_1 ~ s(logdis_m3_pyr_s) + (1 | author_year) + (1 | HYBAS_ID)
+12,emerge_1 ~ s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+13,emerge_1 ~ s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+14,emerge_1 ~ s(stream_temp_s) + s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+15,emerge_1 ~ s(stream_temp_s) + s(crp_pc_sse_s) + s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)

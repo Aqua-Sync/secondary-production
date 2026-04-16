@@ -1,0 +1,2 @@
+chemical,global_flux_MT_peryr,.lower,.upper,.width,.point,.interval,units,notes
+Hg,0.02153601274379479,0.005901848305922677,0.10227502295617957,0.95,median,qi,MT_per_y_western_north_america,only drainages to the Pacific. Compare with Brandt et al. fluxes

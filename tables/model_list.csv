@@ -1,0 +1,16 @@
+value
+s(precip_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)
+"s(precip_s, stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)"
+(1 | author_year) + (1 | HYBAS_ID)
+s(precip_s) + s(stream_temp_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(hft_ix_s93_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(hft_ix_u93_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(hft_ix_s09_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(hft_ix_u09_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(ele_mt_sav_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(logdis_m3_pyr_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(stream_temp_s) + s(crp_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)
+s(stream_temp_s) + s(crp_pc_sse_s) + s(for_pc_sse_s) + (1 | author_year) + (1 | HYBAS_ID)

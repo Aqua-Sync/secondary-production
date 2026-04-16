@@ -1,0 +1,6 @@
+chemical,median,.lower,.upper,.width,.point,.interval,units,region
+dm,211005.2,48307,632987.9,0.9,median,qi,Metric Tons,North America
+C,94952.3,21738.2,284844.6,0.9,median,qi,Metric Tons,North America
+N,15071.8,3450.5,45213.4,0.9,median,qi,Metric Tons,North America
+PUFA,2225.9,496.6,7856.6,0.9,median,qi,Metric Tons,North America
+P,765.7,175.3,2297.1,0.9,median,qi,Metric Tons,North America
