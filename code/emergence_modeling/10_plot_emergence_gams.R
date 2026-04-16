@@ -3,6 +3,8 @@ library(brms)
 library(tidybayes)
 library(patchwork)
 library(cowplot)
+library(ggthemes)
+library(directlabels)
 theme_set(theme_default())
 
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds') %>% 
@@ -102,16 +104,21 @@ a_dir_conv = preds_precip %>%
   geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, 
                                  color = source,
                                  alpha = source),
-             size = 0.5) +
+             size = 1) +
   scale_fill_brewer(palette = "Greens") +
   scale_color_colorblind() +
   scale_alpha_manual(values = c(0.3, 0.9)) +
-  guides(alpha = "none") +
+  guides(alpha = "none", 
+         color = "none") +
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
        fill = "Uncertainty\nInterval",
        subtitle = "a)",
        color = "") +
+  geom_dl(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, label = source, 
+                              color = source, alpha = source), 
+          method = list("top.points", cex = 0.5,
+                        dl.trans(y = y + 0.1))) +
   NULL
 
 b_dir_conv = preds_stream_temp %>% 
@@ -119,12 +126,14 @@ b_dir_conv = preds_stream_temp %>%
   # stat_lineribbon(alpha = 0.25) +
   # stat_lineribbon(data = . %>% filter(outside_inside == "inside")) +
   geom_point(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, color = source,
-                                 alpha = source),
-             size = 0.5) +
+                                 alpha = source, 
+                                 size = 1.5),
+             size = 1) +
   scale_fill_brewer(palette = "Greens") +
   scale_color_colorblind() +
   scale_alpha_manual(values = c(0.3, 0.9)) +
-  guides(alpha = "none") +
+  guides(alpha = "none", 
+         color = "none") +
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = "Mean Annual Temperature (\u00b0C)",
        fill = "Uncertainty\nInterval",
@@ -139,3 +148,4 @@ compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(guides = "collect",
                                                                      legend.text = element_text(size = 8))
 
 ggsave(compare_measures_plot, file = "plots/compare_measures_plot.jpg", width = 5, height = 6)
+

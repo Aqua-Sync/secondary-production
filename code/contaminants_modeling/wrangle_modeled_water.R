@@ -56,7 +56,8 @@ hybas_to_add = hybas_with_flux %>%
   left_join(min_water_concentrations)
 
 # add estimates to the full dataset
-modeled_water_fixed = modeled_water_temp %>% bind_rows(hybas_to_add) %>% distinct()
+modeled_water_fixed = modeled_water_temp %>% bind_rows(hybas_to_add) %>% distinct() %>% 
+  filter(HYBAS_ID %in% readRDS("data/hybas_filtered.rds"))
 
 saveRDS(modeled_water_fixed, file = "data/modeled_water.rds")
 

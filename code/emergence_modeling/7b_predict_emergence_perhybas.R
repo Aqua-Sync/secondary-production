@@ -1,6 +1,9 @@
 library(tidyverse)
 library(tidybayes)
 
+# kgdm_peryear ------------------------------------------------------------
+
+
 # Use the fitted parameters from regression models to predict emergence at unmeasured sites
 
 # 1) load data and models -------------------------------------------------
@@ -87,7 +90,7 @@ post_pufa_hybas_summary = readRDS(file = "posteriors/post_pufa_hybas_summary.rds
 # 3 estimate total flux per hybas ------------------------------------------
 # Summarize and convert dry mass to C, N, P. Then combine with PUFAs
 post_flux_kgdm_perm2year_hybas = bind_rows(post_summary) %>% 
-  pivot_longer(cols = c(-HYBAS_ID, -precip_s)) %>% 
+  pivot_longer(cols = c(-HYBAS_ID, -precip_s, stream_temp_s)) %>% 
   mutate(kgdmkm2y = value*max_emergence) %>% # kg/km2 is the same as mg/m2
   select(-value) %>% 
   # left_join(hybas_area) %>% # km2 of water

@@ -21,6 +21,8 @@ theme_set(theme_default())
 #     add_epred_draws(mod_list[[i]], allow_new_levels = T, re_formula = NULL)
 # }
 # 
+# saveRDS(posts_list, file = "posteriors/posts_list.rds")
+posts_list = readRDS(file = "posteriors/posts_list.rds")
 # 
 # chem_regression_posts = bind_rows(posts_list) %>%
 #   mutate(chemical_category = str_to_sentence(chemical_category))
@@ -46,7 +48,7 @@ chem_concentrations_posts = chem_regression_posts %>%
   facet_wrap(~chemical_category, scales = "free") +
   # scale_y_log10() +
   labs(y = expression("Tissue Concentration (ng mg"^-1*" dry mass)"),
-       x = expression("Water Concentration (ug L"^-1*" z-score)")) +
+       x = expression("Water Concentration (\u00b5g L"^-1*" z-score)")) +
   guides(fill = "none") +
   geom_point(data = raw_contaminants, aes(y = adult_conc_ng_mg_dm), shape = 1, size = 0.5) +
   theme(axis.text = element_text(size = 7),
