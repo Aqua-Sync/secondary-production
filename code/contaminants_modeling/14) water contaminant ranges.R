@@ -57,7 +57,8 @@ water_comparisons_densities = modeled_water_global_empirical %>%
         legend.background = element_rect(fill="white",
                                          size=1, linetype="solid", 
                                          color ="white"),
-        legend.text = element_text(size = 8))
+        legend.text = element_text(size = 8),
+        text = element_text(family = "sans"))
 
 
 ggsave(water_comparisons_densities, 

@@ -44,11 +44,10 @@ raw_vs_modeled_emergence_per_hybas = emergence_production_with_vars %>%
   labs(y = expression("Raw kg hybas"^-1*" yr"^-1," dry mass)"),
        x = expression("Modeled kg hybas"^-1*" yr"^-1," dry mass)")) +
   geom_abline() +
-  
   annotate(
     geom = "text",
     x = 10, y = 1e5,
-    label = bquote(R^2 == .(round(rmod_rsq, 2))))
+    label = as.expression(bquote(R^2 == .(round(rmod_rsq, 2)))))
 
 
 raw_vs_modeled_emergence_per_hybas

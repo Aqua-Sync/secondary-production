@@ -135,6 +135,9 @@ plot_biome_perm2 = d_biome %>%
 ggsave(plot_biome_perm2, file = "plots/plot_biome_perm2.jpg",
        width = 6.5, height = 6.5, dpi = 400)
 
+ggsave(plot_biome_perm2, file = "plots/plot_biome_perm2.svg",
+       width = 6.5, height = 6.5, dpi = 400)
+
 d_biome %>% 
   group_by(terr_biom) %>% 
   tally()

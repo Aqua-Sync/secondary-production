@@ -52,7 +52,9 @@ chem_concentrations_posts = chem_regression_posts %>%
   guides(fill = "none") +
   geom_point(data = raw_contaminants, aes(y = adult_conc_ng_mg_dm), shape = 1, size = 0.5) +
   theme(axis.text = element_text(size = 7),
-        strip.text = element_text(size = 7)) 
+        strip.text = element_text(size = 7),
+        text = element_text(family = "sans"),
+        plot.subtitle = element_text(face = "bold")) 
 
 ggsave(chem_concentrations_posts, file = "plots/chem_concentrations_post.jpg",
        width = 6.5, height = 6.5)

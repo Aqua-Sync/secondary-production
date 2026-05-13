@@ -52,6 +52,7 @@ compare_to_doughty = post_total_all %>%
   labs(x = "Global P export per year (t)")
 
 ggsave(compare_to_doughty, file = "plots/compare_to_doughty.jpg", width = 6, height = 6)  
+ggsave(compare_to_doughty, file = "plots/compare_to_doughty.svg", width = 6, height = 6, dpi = 500)  
 
 
 # per continent -----------------------------------------------------------

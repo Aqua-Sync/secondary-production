@@ -51,8 +51,10 @@ precip_emergence_plot = preds_precip %>%
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
        fill = "Uncertainty\nInterval",
-       subtitle = "a)") +
-  theme(legend.position = c(0.8, 0.8))
+       subtitle = "A") +
+  theme(legend.position = c(0.8, 0.8),
+        text = element_text(family = "sans"),
+        plot.subtitle = element_text(face = "bold")) 
 
 
 preds_stream_temp = tibble(stream_temp_s = seq(min(data_to_predict$stream_temp_s),
@@ -80,14 +82,19 @@ temp_emergence_plot = preds_stream_temp %>%
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = "Mean Annual Temperature (\u00b0C)",
        fill = "Uncertainty\nInterval",
-       subtitle = "b)") 
+       subtitle = "B") +
+  theme(text = element_text(family = "sans"),
+        plot.subtitle = element_text(face = "bold")) 
 
 library(patchwork)
 
 emergence_two_plots = precip_emergence_plot/temp_emergence_plot + plot_layout(axis_titles = "collect")
 
 ggsave(emergence_two_plots, file = "plots/emergence_two_plots.jpg", width = 6, height = 6)
-raw_v_modeled = readRDS(file = "plots/raw_vs_modeled_emergence_per_hybas.rds") + labs(subtitle = "c)")
+
+raw_v_modeled = readRDS(file = "plots/raw_vs_modeled_emergence_per_hybas.rds") + labs(subtitle = "C") +
+  theme(text = element_text(family = "sans"),
+        plot.subtitle = element_text(face = "bold"))
 
 emergence_prediction = emergence_two_plots | raw_v_modeled + 
   plot_layout(ncol = 2, widths = c(0.8, 0.2))
@@ -113,7 +120,7 @@ a_dir_conv = preds_precip %>%
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
        fill = "Uncertainty\nInterval",
-       subtitle = "a)",
+       subtitle = "A",
        color = "") +
   geom_dl(data = mod_dat, aes(y = (emerge_1*max_emergence)/1000, label = source, 
                               color = source, alpha = source), 
@@ -137,15 +144,17 @@ b_dir_conv = preds_stream_temp %>%
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = "Mean Annual Temperature (\u00b0C)",
        fill = "Uncertainty\nInterval",
-       subtitle = "b)",
+       subtitle = "B",
        color = "") +
   # theme(legend.position = "top") +
   NULL
 
 compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(guides = "collect", 
                                     axis_titles = "collect") & theme(legend.position = 'top',
-                                                                     text = element_text(size = 9),
-                                                                     legend.text = element_text(size = 8))
+                                                                     text = element_text(size = 9, family = "sans"),
+                                                                     legend.text = element_text(size = 8),
+                                                                     plot.subtitle = element_text(face = "bold"))
 
 ggsave(compare_measures_plot, file = "plots/compare_measures_plot.jpg", width = 5, height = 6)
+
 
