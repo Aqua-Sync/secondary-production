@@ -14,9 +14,19 @@ library(janitor)
 
 # these data are with basin-wide predictors
 secondary_prod_raw = read_csv("data/ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv") %>%
+  left_join(read_csv('data/ACSP_author_year.csv') %>% distinct()) %>% # adds info on author and year b/c this was removed during the attributes addition from the raw file on the shared drive
   clean_names() %>%
   mutate(id = 1:nrow(.)) %>%
   select(id, everything()) 
+
+
+# extract just the attributes from HYBAS per observation. For joining later to taxa-specific data, etc.
+attributes_by_id = secondary_prod_raw %>% select(-site_id, -index, -lon, -lat, -acsp,-aisp,
+                                                 -eph_sp, -ple_sp, -tri_sp, -chi_sp, -other_sp, -emerg, -units, 
+                                                 -notes, -stream_width_m, -basin_size_km2, -figure_table,
+                                                 -author, -year)
+
+saveRDS(attributes_by_id, file = "data/attributes_by_id.rds")
 
 # 2) harmonize units
 secondary_prod_wrangled = secondary_prod_raw %>%
@@ -24,7 +34,7 @@ secondary_prod_wrangled = secondary_prod_raw %>%
                                grepl("DW", units) ~ "DM",
                                grepl("dry mass", units) ~ "DM",
                                grepl("DM", units) ~ "DM",
-                               grepl("wet", units) ~ "WM",
+                               grepl("wet", units, ignore.case = TRUE) ~ "WM",
                                grepl("mg C", units) ~ "C")) %>% 
   mutate(mass_units = str_sub(units, 1, 1),
          mass_units = case_when(mass_units == "g" ~ "g",  # jsw confirmed that these are accurate on 2025-01-17
@@ -48,7 +58,8 @@ secondary_prod = secondary_prod_wrangled %>%
   select(-raw_value, -value, - units, -perc_ash, - perc_ash_correction) %>% 
   pivot_wider(names_from = name, values_from = dm_mg_m2_y) %>% 
   select(id, mass_type, mass_units, acsp, aisp, eph_sp, ple_sp, tri_sp, chi_sp, other_sp, 
-         emerg, everything())
+         emerg, everything()) %>% 
+  filter(!is.na(acsp) | !is.na(aisp) |!is.na(emerg)) # keep only if here are values for acsp, aisp, or emergence
 
 # 4) check and save
 unique(secondary_prod$mass_type)
@@ -59,6 +70,16 @@ is.na(secondary_prod$mass_units)
 
 write_csv(secondary_prod, file = "data/secondary_prod.csv")
 
+
+# 3) clean and pivot back to original form for taxa (different filter than above)
+secondary_prod_taxa = secondary_prod_wrangled %>% 
+  select(-raw_value, -value, - units, -perc_ash, - perc_ash_correction) %>% 
+  pivot_wider(names_from = name, values_from = dm_mg_m2_y) %>% 
+  select(id, mass_type, mass_units, acsp, aisp, eph_sp, ple_sp, tri_sp, chi_sp, other_sp, 
+         emerg, everything()) 
+
+write_csv(secondary_prod_taxa, file = "data/secondary_prod_taxa.csv")
+
 # summarize
 secondary_prod %>% glimpse() %>% 
   pivot_longer(cols = c(acsp, aisp)) %>% 
@@ -67,11 +88,26 @@ secondary_prod %>% glimpse() %>%
   distinct(id) %>% 
   tally()
 
+# plot taxa
+secondary_prod %>% 
+  pivot_longer(cols = ends_with("_sp")) %>% 
+  filter(value > 0) %>% 
+  ggplot(aes(x = acsp, y = value)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~name, scales = "free") +
+  scale_x_log10() +
+  scale_y_log10() +
+  NULL
 
-# compare with previous version (should be very close...mostly just some deletions of duplicates during QA in early 2026)
-old_secondary_prod = read_csv("data/old/secondary_prod.csv")
+# how many samples had full taxonomic data?
+secondary_prod_raw %>% 
+  pivot_longer(cols = contains("_sp")) %>% 
+  mutate(value = case_when(is.na(value) ~ 0, T ~ 1)) %>% 
+  group_by(id) %>% 
+  reframe(value = sum(value)) %>% 
+  group_by(value) %>% 
+  tally() %>% 
+  mutate(total = 305,
+         prop = n/total)
 
-bind_rows(secondary_prod %>% mutate(data = "new"),
-          old_secondary_prod %>% mutate(data = "old")) %>% 
-  ggplot(aes(x = data, y = acsp)) +
-  geom_jitter(width = 0.1, height = 0) 

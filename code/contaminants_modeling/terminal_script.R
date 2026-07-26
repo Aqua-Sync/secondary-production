@@ -164,20 +164,20 @@ saveRDS(relative_flux, file = "posteriors/relative_flux.rds")
 
 
 # plot relative flux ------------------------------------------------------
-relative_flux = readRDS(file = "posteriors/relative_flux.rds")
-
-set.seed(202020)
-
-relative_flux_histogram = relative_flux %>% 
-  # sample_n(100000) %>% 
-  select(HYBAS_ID, starts_with("median_")) %>% 
-  pivot_longer(cols = c(starts_with("median"))) %>% 
-  ggplot(aes(x = value, fill = name), color = "black") +
-  geom_histogram(bins = 500) +
-  facet_wrap(~name) +
-  scale_x_log10()
-
-ggsave(relative_flux_histogram, file = "plots/relative_flux_histogram.jpg", width = 6.5, height = 4)
+# relative_flux = readRDS(file = "posteriors/relative_flux.rds")
+# 
+# set.seed(202020)
+# 
+# relative_flux_histogram = relative_flux %>% 
+#   # sample_n(100000) %>% 
+#   select(HYBAS_ID, starts_with("median_")) %>% 
+#   pivot_longer(cols = c(starts_with("median"))) %>% 
+#   ggplot(aes(x = value, fill = name), color = "black") +
+#   geom_histogram(bins = 500) +
+#   facet_wrap(~name) +
+#   scale_x_log10()
+# 
+# ggsave(relative_flux_histogram, file = "plots/relative_flux_histogram.jpg", width = 6.5, height = 4)
 
 # quantile(relative_flux$median_prop_contaminants)
 # quantile(relative_flux$median_prop_nutrients)
