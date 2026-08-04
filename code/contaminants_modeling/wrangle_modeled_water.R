@@ -57,9 +57,12 @@ hybas_to_add = hybas_with_flux %>%
 
 # add estimates to the full dataset
 modeled_water_fixed = modeled_water_temp %>% bind_rows(hybas_to_add) %>% distinct() %>% 
-  filter(HYBAS_ID %in% readRDS("data/hybas_filtered.rds"))
+  filter(HYBAS_ID %in% readRDS("data/hybas_filtered.rds"))  %>% select(-year, -month, -det.freq, -mean.conc, -max.conc) %>% 
+  mutate(mean.conc.year = round(mean.conc.year, 2),
+         max.conc.year = round(max.conc.year, 2),
+         mean.det.year = round(mean.det.year, 2))
 
-saveRDS(modeled_water_fixed, file = "data/modeled_water.rds")
+saveRDS(modeled_water_fixed, file = "data/modeled_water.rds", compress = "xz")
 
 unique_cas_split = modeled_water_temp %>% distinct(cas) %>% 
   mutate(cas = as.character(cas)) %>% 

@@ -2,7 +2,7 @@ library(tidyverse)
 library(janitor)
 
 
-hybas_regions_centroids <- read_csv("data/hybas_regions_centroids.csv")
+hybas_regions_centroids <- readRDS("data/hybas_regions_centroids.rds")
 
 # 1) load posteriors for each contaminant
 hybas_predictions_mgperyear_fungicide <- readRDS("posteriors/hybas_predictions_mgperyear_filtered_fungicide.rds") %>% 
