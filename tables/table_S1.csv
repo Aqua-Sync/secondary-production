@@ -1,0 +1,11 @@
+measure,nutrient,units,median,.lower,.upper
+Export per surface water area,Dry Mass,mg/m2/y,1300,47,20000
+Export per surface water area,Carbon,mg/m2/y,560,21,9100
+Export per surface water area,Nitrogen,mg/m2/y,89,3.4,1400
+Export per surface water area,PUFA,mg/m2/y,12,0.42,240
+Export per surface water area,Phosphorus,mg/m2/y,4.5,0.17,73
+Global export,Dry Mass,t/y,1870000,961000,3515000
+Global export,Carbon,t/y,841000,433000,1582000
+Global export,Nitrogen,t/y,134000,69000,251000
+Global export,PUFA,t/y,20000,5000,43000
+Global export,Phosphorus,t/y,7000,3000,13000

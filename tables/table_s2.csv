@@ -1,0 +1,12 @@
+chemical,global_flux_MT_peryr,.lower,.upper,.width,.point,.interval
+Zn,300,57,770,0.95,median,qi
+Cu,52,34,77,0.95,median,qi
+Pb,7.8,2.3,45,0.95,median,qi
+Se,4.7,1.4,13,0.95,median,qi
+Cd,2.1,0.41,6.4,0.95,median,qi
+Hg,0.7,0.19,2.6,0.95,median,qi
+Total Metals,380,120,830,0.95,median,qi
+herbicide,0.08,0.01,0.4,1,median,qi
+insecticide,0.009,0.002,0.04,1,median,qi
+fungicide,0.003,0.001,0.01,1,median,qi
+Total,0.1,0.02,0.4,1,median,qi
