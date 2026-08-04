@@ -51,6 +51,12 @@ for(i in seq_along(data_to_predict_list)) {
       lower50 = quantile(.epred, 0.25),
       upper50 = quantile(.epred, 0.75),
       upper = quantile(.epred, 0.975)
+    ) %>% 
+    mutate(
+      across(
+        where(is.numeric) & !all_of("HYBAS_ID"),
+        ~ as.numeric(signif_half_up(.x, 2))
+      )
     )
 }
 
