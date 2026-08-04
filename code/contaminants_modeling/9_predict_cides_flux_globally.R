@@ -29,7 +29,8 @@ cas_names = readRDS(file = "data/cas_names.rds") %>%
 
 # check to match the chemical and cas id
 ides_wehave = contaminants_ides %>% distinct(chemical, chemical_category) %>% 
-  left_join(cas_names %>% mutate(chemical = str_to_lower(chemical)) %>% select(-chemical_category)) %>% 
+  left_join(cas_names %>% mutate(chemical = str_to_lower(chemical)) %>% 
+              select(-chemical_category)) %>% 
   filter(!is.na(cas))
 
 # Jakob Wolframs predictions of contaminants. Generated in wrangle_modeled_water.R. It uses water concentrations from Jakob Wolfram on seafile.rlp.net...then reformats.
