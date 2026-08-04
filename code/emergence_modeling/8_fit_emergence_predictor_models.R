@@ -18,7 +18,14 @@ sd_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:scale
 # saveRDS(data_to_predict, file = "data/data_to_predict.rds")
 
 # load prefit models
-updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below
+# get mod files
+gam_files = list.files(path = "models/",
+                        pattern = "^updated_gams_")
+
+gam_files = gam_files[order(as.numeric(sub("updated_gams_([0-9]+)\\.rds", "\\1", gam_files)))]
+
+# read models into a list
+updated_gams = lapply(paste0("models/",gam_files), readRDS)
 
 # fit models ---------------------
 
@@ -104,8 +111,6 @@ saveRDS(updated_gams, file = "models/updated_gams.rds")
 # fit taxa model ---------------------------------------------------------
 emergence_production_with_vars_taxa = readRDS(file = 'data/emergence_production_with_vars_taxa.rds')
 
-updated_gams = readRDS("models/updated_gams.rds")
-
 mod_taxa_emerge = update(updated_gams[[3]], 
                          formula = . ~ s(precip_s, stream_temp_s, 
                                          by = taxon_original) + # the new part
@@ -122,8 +127,6 @@ saveRDS(mod_taxa_emerge, file = "models/mod_taxa_emerge.rds")
 
 # fit model with prop_diptera as predictor --------------------------------
 # load prop taxa, which is the posterior predictions from the model above. then add prop_diptera to the regression models. Does it improve fit?
-
-updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below
 
 post_taxa_prop = updated_gams[[3]]$data %>% 
   expand_grid(taxon_original = unique(emergence_production_with_vars_taxa$taxon_original)) %>% 
@@ -158,7 +161,6 @@ saveRDS(mod_ept_predict, file = "models/mod_ept_predict.rds")
 
 mod_diptera_predict = readRDS(file = "models/mod_diptera_predict.rds")
 mod_ept_predict = readRDS(file = "models/mod_ept_predict.rds")
-updated_gams = readRDS(file = "models/updated_gams.rds")
 
 chi_plot = plot(conditional_effects(mod_diptera_predict, effects = "stream_temp_s:precip_s"), points = F)
 ept_plot = plot(conditional_effects(mod_ept_predict, effects = "stream_temp_s:precip_s"), points = F)

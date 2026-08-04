@@ -69,8 +69,14 @@ bind_rows(final_mod_rhats) %>%
 
 # 15 models ---------------------------------------------------------------
 
-# load prefit models
-updated_gams = readRDS("models/updated_gams.rds") # stores all of the individual models below
+# get mod files
+gam_files <- list.files(path = "models/",
+                        pattern = "^updated_gams_")
+
+gam_files <- gam_files[order(as.numeric(sub("updated_gams_([0-9]+)\\.rds", "\\1", gam_files)))]
+
+# read models
+updated_gams <- lapply(paste0("models/",gam_files), readRDS)
 
 pp_data_list = list()
 
