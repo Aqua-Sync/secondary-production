@@ -1,3 +1,7 @@
+#####!! This code fits a large model called "final_mod.rds". It is ~500MB, too large for github
+#####!! A smaller version is loaded to github and called "final_mod_small.rds". To run code with the smaller
+#####!! version, find/replace readRDS("models/final_mod.rds") with readRDS("models/final_mod.rds") in all code.
+
 library(tidyverse)
 library(brms)
 library(janitor)
@@ -38,6 +42,18 @@ draws_list <- lapply(1:k, function(i) {
 final_mod = update(readRDS("models/final_mod.rds"), chains = 4, iter = 2000, newdata = draws_list)
 
 saveRDS(final_mod, file = 'models/final_mod.rds')
+
+
+# make a small version ----------------------------------------------------
+
+k_small = 20
+
+draws_list_small <- lapply(1:k_small, function(i) {
+  df = posts_emergence %>% mutate(emerge_1 = emerge_mean_centered) %>% filter(.draw == i)
+  df
+})
+final_mod_small = update(final_mod, chains = 1, iter = 500, newdata = draws_list_small)
+saveRDS(final_mod_small, file = 'models/final_mod_small.rds', compress = "xz")
 
 
 
