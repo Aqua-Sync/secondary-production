@@ -1,0 +1,20 @@
+---
+title: "Emergence Workflow"
+output: html_notebook
+---
+
+# Methods
+
+*Emergence*
+
+We collected a total of X literature estimates of annual emergence production (mgDM/m2/y). To augment these measures, we also estimated emergence production from 2XX literature estimates of annual benthic secondary production from freshwater streams. Of these, XX reported (or we could calculate) only community-level production that included both insect and non-insect production. X reported (or we could calculate) only insect production and XX reported (or we could calculate) both community-level and insect-only production.
+
+To convert benthic secondary production to emergence, studies that only contained community-level production were first converted to insect-only production by modeling the fraction of total community production that were insects. To do this, we calculated the raw fraction of insect:community production $(f)$ from the XX studies that reported both levels of production. To estimate uncertainty in those proportions and account for multiple measures within a single study, we fit an intercept only model with $f$ as the response variable and author and year as a varying intercept. The likelihood was Beta and the prior for the intercept was the $N(0.66, 0.07)$, corresponding to a prior mean fraction of \~66%, consistent with prior estimates by Gratton et al. (2009).
+
+To convert benthic insect production to emergence production, we first estimated mean emergence-to-production (E:P) ratio using data form Gratton et al. (2009) and Raitif et al. (200X). We used a Beta likelihood and and an intercept only model with varying intercepts for study and taxon. The response variable was E:P ratio. After obtaining this estimate, we multiplied the posterior distribution of E:P ratios by the insect production estimates (both the empirical and derived estimates). Combining these with the empirical emergence resulted in XX emergence estimates.
+
+To determine which environmental variables best-predicted emergence, we used the emergence estimates (and their standard deviation) as the response variable in a set of generalized additive mixed models with a Gamma likelihood and log-link. Prior values were determined with prior predictive simulation (Wesner and Pomeranz 2021). We fit 15 models with predictors including mixtures and univariate combinations of mean annual stream temperature, mean annual precipitation, X, X, and, Y. All models had varying intercepts of author/year and HYBAS_ID, both of which was included to allow posterior prediction to new locations. Values for the fixed predictors were determined using the lat/long location of each emergence sample and predicted values from [JAKOB FILL THIS IN].
+
+After fitting these models, we used model selection to identify the top model in the candidate set using loo. From this model, we then used the values of predictor variables in each global HYBAS_ID (n = 943,000) to predict emergence production. This generated 943,000 predictions of emergence production (kgDM/m2/year). Multiplying this by the area of river water in each HYBAS_ID generated predictions of emergence per HYBAS_ID (kgDM/year). Summing across all HYBAS_IDs generated posterior predictions of global insect emergence.
+
+*Contaminants - water to adult concentrations*
