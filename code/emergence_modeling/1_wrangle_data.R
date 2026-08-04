@@ -111,3 +111,17 @@ secondary_prod_raw %>%
   mutate(total = 305,
          prop = n/total)
 
+secondary_prod_raw %>% 
+  pivot_longer(cols = contains("_sp")) %>% 
+  filter(!is.na(value)) %>% 
+  group_by(name) %>% 
+  tally()
+
+
+# set ggplot font ---------------------------------------------------------
+
+library(ggplot2)
+
+theme_set(theme(
+      text = element_text(size = 14),
+      panel.grid = element_blank()))

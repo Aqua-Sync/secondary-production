@@ -221,8 +221,6 @@ emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_
 
 a_dir_conv = preds_precip %>% 
   ggplot(aes(x = precip_raw, y = (.epred*mean_emergence)/1000)) +
-  # stat_lineribbon(alpha = 0.25) +
-  # stat_lineribbon(data = . %>% filter(outside_inside == "inside")) +
   geom_point(data = emergence_production_with_vars, aes(y = (emerge_mean_centered*mean_emergence)/1000, 
                                  color = source,
                                  alpha = source),
@@ -230,23 +228,24 @@ a_dir_conv = preds_precip %>%
   scale_fill_brewer(palette = "Greens") +
   scale_color_colorblind() +
   scale_alpha_manual(values = c(0.3, 0.9)) +
-  guides(alpha = "none", 
-         color = "none") +
+  guides(color = guide_legend(override.aes = list(alpha = 0.5)),
+         alpha = "none") +
   labs(y = expression("Annual Emergence Production (g m"^-2*" yr"^-1*" dry mass)"),
        x = expression("Annual Precipitation (mm m"^-2*" yr"^-1*")"),
        fill = "Uncertainty\nInterval",
        subtitle = "A",
        color = "") +
-  geom_dl(data = emergence_production_with_vars, aes(y = (emerge_mean_centered*mean_emergence)/1000, label = source, 
-                              color = source, alpha = source), 
-          method = list("top.points", cex = 0.5,
-                        dl.trans(y = y + 0.1))) +
+  theme(legend.position = c(0.8, 0.8),
+        legend.title = element_blank(),
+        legend.background = element_rect(color = "black", linewidth = 0.1)) +
+  # geom_dl(data = emergence_production_with_vars, aes(y = (emerge_mean_centered*mean_emergence)/1000, label = source, 
+  #                             color = source, alpha = source), 
+  #         method = list("top.points", cex = 0.5,
+  #                       dl.trans(y = y + 0.1))) +
   NULL
 
 b_dir_conv = preds_stream_temp %>% 
   ggplot(aes(x = stream_temp, y = (.epred*mean_emergence)/1000)) +
-  # stat_lineribbon(alpha = 0.25) +
-  # stat_lineribbon(data = . %>% filter(outside_inside == "inside")) +
   geom_point(data = emergence_production_with_vars, aes(y = (emerge_mean_centered*mean_emergence)/1000, color = source,
                                  alpha = source, 
                                  size = 1.5),
@@ -261,12 +260,9 @@ b_dir_conv = preds_stream_temp %>%
        fill = "Uncertainty\nInterval",
        subtitle = "B",
        color = "") +
-  # theme(legend.position = "top") +
   NULL
 
-compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(guides = "collect", 
-                                                            axis_titles = "collect") & theme(legend.position = 'top',
-                                                                                             text = element_text(size = 9, family = "sans"),
+compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(axis_titles = "collect") & theme(text = element_text(size = 9, family = "sans"),
                                                                                              legend.text = element_text(size = 8),
                                                                                              plot.subtitle = element_text(face = "bold"))
 
@@ -393,3 +389,13 @@ simulate_pufa_temp_plot = plot_grid(effect_size_plot + labs(x = ""),
                                     labels = "AUTO", label_x = 0, label_y = 1)
 
 ggsave(simulate_pufa_temp_plot, file = "plots/Figure_S13.jpg", width = 6, height = 9, dpi = 400)
+
+
+
+# Figure S14: PUFA by taxa effect -----------------------------------------
+
+plot_taxa_emerge = readRDS("plots/plot_taxa_emerge.rds")
+plot_taxonomic_effect = readRDS("plots/plot_taxonomic_effect.rds")
+
+plot_taxa_emerge/plot_taxonomic_effect
+

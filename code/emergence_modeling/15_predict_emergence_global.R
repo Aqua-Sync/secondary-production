@@ -143,6 +143,13 @@ post_mass_nutrients_pufa_global = post_total_all %>%
 write_csv(post_mass_nutrients_pufa_global, 
           file = "tables/post_emergence_global.csv") 
 
+post_total_pufa_tempcorrected %>% 
+  group_by(chemical) %>% 
+  median_qi(median = flux/1000) %>% 
+  mutate(units = "Metric Tons") %>% 
+  arrange(-median) %>%
+  mutate(across(where(is.double), ~ round(.x, -3)))
+
 # Bar-on estimate that terrestrial arthropods make up 0.2 gigatons of C (compared to 550 gigatons of total earth biomass).
 # We estimate that emerging aquatic insects make up ~0.8 million tons of C. 1 gigaton = 1,000,000,000 metric tons. 0.2 gigatons
 # = 200 million metric tons. So emerging aquatic insects make up ~ 0.7/200 = 0.0035 (i.e., 0.35%). This is a good sanity check.

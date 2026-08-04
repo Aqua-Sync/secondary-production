@@ -13,7 +13,9 @@ theme_set(theme_default())
 # provides a glimpse of the amount of mortality-driven contaminant effects that might
 # already be accounted for in our estimates of emergence.
 
-cas_names = readRDS("C:/Users/jeff.wesner/OneDrive - The University of South Dakota/USD/Github Projects/secondary-production/data/cas_names.rds")
+cas_names = readRDS("C:/Users/jeff.wesner/OneDrive - The University of South Dakota/USD/Github Projects/secondary-production/data/cas_names.rds") %>% 
+  mutate(chemical = case_when(chemical == "1,2,4,5,6,7,8,8-Octachloro-2,3,3a,4,7,7a-hexahydro-4,7-methano-1<em>H</em>-indene" ~ "Chlordane", 
+                              T ~ chemical)) 
 modeled_water = as_tibble(readRDS(file = "data/modeled_water.rds")) %>% # values have been corrected for minimums with essential elements (i.e., if water concentrations indicate zero Se but still has emergence, then we need to assign a minimum amount to flux b/c flux of Se in tissues can't also be zero)
   left_join(cas_names) %>% 
   mutate(water_ug_l_raw = 10^(mean.conc.year * mean.det.year)) %>% 
@@ -41,7 +43,6 @@ modeled_water_global_empirical = modeled_water %>%
   mutate(chem = str_sub(chemical, 1, 25)) %>% 
   mutate(data = fct_relevel(data, "Hydrobasins with empirical emergence data"))
 
-
 water_comparisons_densities = modeled_water_global_empirical %>% 
   ggplot(aes(x = water_ug_l_raw, fill = data, y = reorder(chem, -median),
              alpha = data)) +
@@ -55,17 +56,14 @@ water_comparisons_densities = modeled_water_global_empirical %>%
   guides(alpha = "none") +
   theme(legend.position = c(0.745, 1),
         legend.background = element_rect(fill="white",
-                                         size=1, linetype="solid", 
+                                         linewidth=1, linetype="solid", 
                                          color ="white"),
         legend.text = element_text(size = 8),
         text = element_text(family = "sans"))
 
-
 ggsave(water_comparisons_densities, 
        file = "plots/Figure_S8.jpg", 
        dpi = 400, width = 6.5, height = 7)
-
-
 
 # Figure S11: contaminant regressions -------------------------------------
 

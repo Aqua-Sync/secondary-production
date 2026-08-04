@@ -156,38 +156,35 @@ mod_ept_predict = update(mod_diptera_predict, formula = . ~ s(precip_s, stream_t
 saveRDS(mod_diptera_predict, file = "models/mod_diptera_predict.rds")
 saveRDS(mod_ept_predict, file = "models/mod_ept_predict.rds")
 
-mod_diptera_predict
-mod_ept_predict
+mod_diptera_predict = readRDS(file = "models/mod_diptera_predict.rds")
+mod_ept_predict = readRDS(file = "models/mod_ept_predict.rds")
+updated_gams = readRDS(file = "models/updated_gams.rds")
 
-plot(conditional_effects(mod_diptera_predict), points = T)
-plot(conditional_effects(mod_ept_predict), points = T)
+chi_plot = plot(conditional_effects(mod_diptera_predict, effects = "stream_temp_s:precip_s"), points = F)
+ept_plot = plot(conditional_effects(mod_ept_predict, effects = "stream_temp_s:precip_s"), points = F)
+gam_plot = plot(conditional_effects(updated_gams[[3]], effects = "stream_temp_s:precip_s"), points = F)
 
-updated_gams_new = readRDS("models/updated_gams.rds")
-updated_gams_new[[1 + length(updated_gams)]] = mod_diptera_predict
-updated_gams_new[[2 + length(updated_gams)]] = mod_ept_predict
+library(patchwork)
+a = gam_plot$`stream_temp_s:precip_s`+ labs(y = "Annual Insect Emergence Production (mean centered)",
+                                            x = "Mean Annual Stream Temperature (z-score)",
+                                            fill = "Mean Annual Precipitation\n(z-score)",
+                                            color = "Mean Annual Precipitation\n(z-score)",
+                                            subtitle = "A: s(precip*temp) + ...") + 
+  theme_cowplot()
+b = chi_plot$`stream_temp_s:precip_s` + labs(y = "Annual Insect Emergence Production (mean centered)",
+                                             x = "Mean Annual Stream Temperature (z-score)",
+                                             fill = "Mean Annual Precipitation\n(z-score)",
+                                             color = "Mean Annual Precipitation\n(z-score)",
+                                             subtitle = "B: s(precip*temp) + prop_chironomidae + ...")+ 
+  theme_cowplot()
+c = ept_plot$`stream_temp_s:precip_s`+ labs(y = "Annual Insect Emergence Production (mean centered)",
+                                            x = "Mean Annual Stream Temperature (z-score)",
+                                            fill = "Mean Annual Precipitation\n(z-score)",
+                                            color = "Mean Annual Precipitation\n(z-score)",
+                                            subtitle = "C: s(precip*temp)+ prop_EPT + ...")+ 
+  theme_cowplot()
 
-model_formulas_list = list()
-
-for(i in 1:length(updated_gams_new)){
-  model_formulas_list[[i]] = tibble(formula = deparse(updated_gams_new[[i]]$formula$formula[[3]])) %>% 
-    mutate(formula = stringr::str_c(formula, collapse = " ")) %>% 
-    pull(formula) %>% 
-    str_squish()
-  
-  model_formulas_list[[i]] = model_formulas_list[[i]][1] # remove duplicates
-}
-
-model_list = bind_rows(as_tibble(unlist(model_formulas_list)))
-
-
-# get_mod_names = function(model){as.character(model$formula$formula[[3]][2])}
-
-ic_gams = lapply(updated_gams_new, FUN = brms::loo) 
-
-# names(ic_gams) = mod_names
-
-elpd_diffs = loo_compare(ic_gams) %>% 
-  as_tibble() %>% 
-  mutate(lower = elpd_diff - 2*se_diff,
-         upper = elpd_diff + 2*se_diff)
+plot_taxonomic_effect = a/b/c + plot_layout(axis_titles = "collect", guides = "collect")
+saveRDS(plot_taxonomic_effect, file = "plots/plot_taxonomic_effect.rds")
+ggsave(plot_taxonomic_effect, file = "plots/plot_taxonomic_effect.jpg", dpi = 400, width = 7, height = 8)
 

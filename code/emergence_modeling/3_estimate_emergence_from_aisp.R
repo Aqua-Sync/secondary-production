@@ -172,7 +172,7 @@ saveRDS(compare_emerge_plot, file = "plots/compare_emerge_plot.rds")
 
 # 5) plot
 
-emergence_production = read_csv(file = "data/emergence_production.csv") %>% 
+emergence_production = readRDS(file = "data/emergence_production.rds") %>% 
   mutate(source = case_when(empirical_emergence == "no" ~ "Converted from ACSP",
                             TRUE ~ "Directly Measured")) %>% 
   arrange(mean_emergence_mgdmm2y) 
@@ -187,8 +187,6 @@ emer = bind_rows(emergence_production %>% mutate(grouping = "All Data"),
                  emergence_production %>% filter(source != "Directly Measured") %>% 
                    mutate(grouping = "Converted from ACSP")) %>% 
   mutate(jitter_offset = rnorm(nrow(.), 0, 0.1))
-
-
 
 emergence_compared_raw_acsp_revised = emer %>% 
   ggplot(aes(x = grouping, y = mean_emergence_mgdmm2y)) +

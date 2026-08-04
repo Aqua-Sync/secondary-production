@@ -85,6 +85,8 @@ pufa_data_short = readRDS("data/pufa_data.rds") %>%
          log10_stream_temp = log10(stream_temp),
          log10_stream_temp_s = scale(log10_stream_temp))
 
+length(unique(pufa_data_short$pub_number))
+
 # pufa_mod = brm(y_s ~ 1 + (1|pub_name),
 #                data = pufa_data_short,
 #                family = Gamma(link = "log"),

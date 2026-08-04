@@ -169,11 +169,15 @@ ggsave(plot_emergence_precip_nodots, file = "plots/plot_emergence_precip_nodots.
 
 # taxa model --------------------------------------------------------------
 
-mod_taxa_emerge = readRDS(file = "models/mod_taxa_emerge.rds")
+
 emergence_production_with_vars_taxa = readRDS("data/emergence_production_with_vars_taxa.rds")
 mean_temp = attributes(emergence_production_with_vars_taxa$stream_temp_s)$`scaled:center`
 sd_temp = attributes(emergence_production_with_vars_taxa$stream_temp_s)$`scaled:scale`
 mean_emergence = mean(emergence_production_with_vars_taxa$mean_emergence_mgdmm2y, na.rm = T)
+mod_taxa_emerge = readRDS(file = "models/mod_taxa_emerge.rds")
+mod_taxa_data = mod_taxa_emerge$data %>% 
+  mutate(.epred = emerge_1*mean_emergence,
+         stream_temp = stream_temp_s*sd_temp + mean_temp)
 taxon_names = emergence_production_with_vars_taxa %>% glimpse() %>% 
   distinct(taxon_original) %>% 
   mutate(taxon = case_when(taxon_original == "chi_sp" ~ "A (Diptera)",
@@ -190,15 +194,16 @@ post_taxa_emerge = mod_taxa_emerge$data %>%
                              max(mod_taxa_emerge$data$stream_temp_s),
                              length.out = 30)) %>% 
   add_epred_draws(mod_taxa_emerge, re_formula = "~ (1|taxon_original)") %>% 
-  mutate(.epred = .epred*mean_emergence) %>% 
+  mutate(.epred = .epred*mean_emergence,
+         stream_temp = stream_temp_s*sd_temp + mean_temp) %>% 
   left_join(taxon_names)
 
 plot_taxa_emerge = post_taxa_emerge %>% 
-  ggplot(aes(x = stream_temp_s*sd_temp + mean_temp, y = .epred, fill = taxon)) +
+  ggplot(aes(x = stream_temp, y = .epred, fill = taxon)) +
   stat_lineribbon(alpha = 0.25) +
   facet_wrap(~taxon) +
   scale_y_log10() +
-  geom_point(data = mod_taxa_emerge$data %>% left_join(taxon_names), aes(y = emerge_1*mean_emergence,
+  geom_point(data = mod_taxa_data %>% left_join(taxon_names), aes(y = .epred,
                                                                          color = taxon),
              size = 0.2) +
   guides(fill = "none", color = "none") +
@@ -207,7 +212,7 @@ plot_taxa_emerge = post_taxa_emerge %>%
   theme(strip.text = element_text(hjust = 0))
 
 ggsave(plot_taxa_emerge, file = "plots/plot_taxa_emerge.jpg", width = 6, height = 5)
-
+saveRDS(plot_taxa_emerge, file = "plots/plot_taxa_emerge.rds")
 
 
 # taxon proportions
