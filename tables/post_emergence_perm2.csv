@@ -1,6 +1,6 @@
 chemical,median,.lower,.upper,.width,.point,.interval
-mgDMm2y,1680,130,17770,0,median,qi
-mgCm2y,750,60,8000,0,median,qi
-mgNm2y,120,10,1270,0,median,qi
-∑mgPUFAm2y,20,0,210,0,median,qi
-mgPm2y,10,0,60,0,median,qi
+mgDMm2y,1300,47,20000,0.95,median,qi
+mgCm2y,560,21,9100,0.95,median,qi
+mgNm2y,89,3.4,1400,0.95,median,qi
+∑mgPUFAm2y,12,0.42,240,0.95,median,qi
+mgPm2y,4.5,0.17,73,0.95,median,qi

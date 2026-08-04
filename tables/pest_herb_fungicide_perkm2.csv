@@ -1,5 +1,5 @@
 chemical,global_flux_mg_peryr_perkm2,.lower,.upper,.width,.point,.interval,code
-fungicide,3.487429150043143,1.4448223182004103,16.32296470071176,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
-herbicide,114.54864098790982,18.391645809302325,559.2856222599705,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
-insecticide,11.698710229408757,2.1817284408653133,49.21699580726437,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
-Sum Pesticides,134.72358217700713,31.05940599355146,581.1507254709123,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
+fungicide,3.355325604821064,1.393197310843895,15.725721797873213,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
+herbicide,107.56191947299584,17.265126384531058,525.0936814722497,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
+insecticide,11.912371343812207,2.156168182026836,51.15991441166578,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
+Sum Pesticides,127.37073270521141,29.926465677027366,548.6806235089973,0.95,median,qi,7) calculate_global_insecticide_herbicide_fungicide_flux_perm2.R
