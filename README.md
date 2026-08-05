@@ -6,6 +6,8 @@
 This page provides data and code for *Larsen et al.* *Global export of
 biomass and contaminants from rivers to land by aquatic insects*.
 
+## Code
+
 All figures and tables in the manuscript can be recreated by running the
 R scripts below. The scripts are named in order (e.g., 1, 2, 3…), so
 that script 2 might not work without running script 1 first, and so
@@ -49,6 +51,43 @@ The scripts below are in the folders `code/emergence_modeling` or
 | emergence contaminants and PUFA prediction | 14_relative_importance_modeling.R | Estimate the relative importance of contaminant concentrations vs. biomass in explaining flux of contaminants | NA |
 | emergence contaminants and PUFA prediction | 15_contaminant_figures | Generates figures of contaminants and PUFA used in the manuscript. | NA |
 | emergence contaminants and PUFA prediction | 16_contaminant_tables | Generates tables of contaminants and PUFA used in the manuscript. | NA |
+
+## Data
+
+The table below describes each data file that is used/created by the
+scripts above.
+
+| Number | Data | Description | Use |
+|---:|:---|:---|:---|
+| 1 | ACSP_author_year.csv | Author and year information for extracted secondary and emergence production data. | Appends information to main data files described below. |
+| 2 | ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv | Literature-extracted production data (secondary and emergence) with environmental attributes from HydroBasin (e.g., temp, precip, etc.). | NA |
+| 3 | ALL_SALMON_HYBAS-L12.rds | HYBAS codes for watersheds in Brandt et al. (2024). | To compare export of salmon in Brandt et al. (2024) to export of insects in the same locations. |
+| 4 | AquaSync-Contaminant_transfer-2024-2-21_JMK(main_data_good_names).csv | Literature-extracted tissue and water concentration data of contaminants. | Raw (pre-wrangled) data used to model relationship between water concentrations and tissue concentrations. |
+| 5 | AquaSync-Contaminant_transfer-2024-2-21_JMK(pufa).csv | Literature-extracted tissue concentraitons of PUFA. | Raw (pre-wrangled) data used to model PUFA concentrations in adult aquatic insects. |
+| 6 | atlas.slim.rds | HYBAS codes that exclude desert or ice-covered basins. | Used to filter HYBAS predictions so that emergence isn’t predicted from ice-covered/dry basins. |
+| 7 | attributes_by_id.rds | Environmental attributes for each extracted production value. | Used to append environmental attributes in wrangling. |
+| 8 | cas_names.rds | Chemical Abstracts Service (CAS) registry numbers for each contaminant | Used to ensure consistent contaminant naming. |
+| 9 | contaminants.rds | Wrangled contaminant tissue concentrations. | Cleaned version of data \#4 (AquaSync-Contaminant…good names).csv). Harmonized units, filtered to analyzed elements, quality-checked, etc. Used to model contaminant tissue concentrations. |
+| 10 | data_to_predict.rds | Environmental parameters (e.g., temp, precip, etc.) for all ~ 900,000 HYBAS basins. | Used to predict export of biomass and elements from each basin based on posterior predictions of GAM models. |
+| 11 | e_p_ratios.csv | Emergence:Production ratios from Gratton et al. (2009). | Used to model E:P ratios when converting secondary production to emergence production. |
+| 12 | emergence_production.rds | Wrangled emergence production estimates. | Derived from data file \#2. |
+| 13 | emergence_production_with_vars.rds | Same as data file \#12, but with environmental predictors added. | Used to model emergence production. |
+| 14 | emergence_production_with_vars_taxa.rds | Same as data file \#13, but with estimates of taxon-specific emergence production rather than community production. | Used to model emergence production of individual taxa. |
+| 15 | gratton_supplement_A.xlsx | Estimates from Gratton et al. (2009) of the proportion of total community secondary production that is insects. | Used to derive a prior proportion. |
+| 16 | hybas_covariates.rds | Biome categories for all \>900,000 HYBAS basins | Used to estimate biome-specific export. |
+| 17 | hybas_filtered.rds | HYBAS codes that exclude desert or ice-covered basins (NOTE: same as atlas.slim.rds? Could merge…) | Used to filter HYBAS predictions so that emergence isn’t predicted from ice-covered/dry basins. |
+| 18 | hybas_regions.rds | Continent names for each HYBAS | Used to summarize export across continents. |
+| 19 | hybas_regions_centroids.rds | Same as data \#18, but with lat/long centroids | Used to estimate latitudinal gradients in relative flux. |
+| 20 | HYBAS_surface_area_REDIST.rds | Surface area of river water in each HYBAS. | Used to estimate total export per hybas. |
+| 21 | hydrobasin_vars_rssa_short.rds | HYBAS environmental parameters. | Used to create data \#10 (data_to_predict.rds) |
+| 22 | modeled_water.rds | Estimates of contaminant water concentrations in each HYBAS basin. | Used to predict contaminant export. |
+| 23 | modeled_water_ids_mean.rds | Same as modeled_water.rds, but for pesticides only | Used to predict pesticide export. |
+| 24 | pufa_data.rds | Wrangled concentraitons of PUFA concentrations in adult aquatic insects. | Used to model PUFA tissue concentrations. |
+| 25 | PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv | Raw (pre-wrangled) version of pufa_data.rds. | Similar to “AquaSync-Contaminant_transfer-2024-2-21_JMK(pufa).csv”, but with environmental attributes added. |
+| 26 | secondary_prod.csv | Wrangled secondary production estimates from the raw data: ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv | Used to model insect production as a fraction of community production. |
+| 27 | secondary_prod_sd.rds | Similar to ‘secondary_prod.csv’ but with the posterior standard deviation of aquatic insect secondary produciton. | Used to simulate draws of secondary production, generating uncertainty. |
+| 28 | secondary_prod_taxa.csv | Same as ‘secondary_prod.csv’, but for each taxon. | Used to model taxon-specific production. |
+| 29 | secondary_prod_with_attributes.rds | Same as ‘secondary_prod.csv’, but with environmental attributes. | Used to re-append attributes to emergence estimates before fitting with GAMs. |
 
 ## Packages
 
