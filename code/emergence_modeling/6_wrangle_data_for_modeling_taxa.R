@@ -10,7 +10,7 @@ library(scales)
 source('code/custom_functions/estimate_streamtemp.R') # this converts air temperature to stream temperatures using a published equation
 
 # load data ---------------------
-emergence_production_taxa = read_csv(file = "data/emergence_production_taxa.csv") %>% 
+emergence_production_taxa = readRDS(file = "data/emergence_production_taxa.rds") %>% 
   mutate(tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C
          pre_cm_syr1000 = pre_mm_syr/1000,
          # precip_s = scale(pre_mm_syr),
