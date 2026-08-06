@@ -6,8 +6,6 @@ library(scales)
 
 theme_set(theme_default())
 
-
-
 # final_model -------------------------------------------------------------
 
 #plot pp_checks

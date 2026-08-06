@@ -1,6 +1,6 @@
 #####!! This code fits a large model called "final_mod.rds". It is ~500MB, too large for github
 #####!! A smaller version is loaded to github and called "final_mod_small.rds". To run code with the smaller
-#####!! version, find/replace readRDS("models/final_mod.rds") with readRDS("models/final_mod.rds") in all code.
+#####!! version, find/replace readRDS("models/final_mod.rds") with readRDS("models/final_mod_small.rds") in all code.
 
 library(tidyverse)
 library(brms)
@@ -39,7 +39,8 @@ draws_list <- lapply(1:k, function(i) {
 #                      chains = 4, iter = 2000,
 #                      control = list(adapt_delta = 0.85))
 
-final_mod = update(readRDS("models/final_mod.rds"), chains = 4, iter = 2000, newdata = draws_list)
+
+final_mod = update(readRDS("models/final_mod_small.rds"), chains = 4, iter = 2000, newdata = draws_list)
 
 saveRDS(final_mod, file = 'models/final_mod.rds')
 
