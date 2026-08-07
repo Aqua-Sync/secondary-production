@@ -3,11 +3,11 @@ library(brms)
 library(janitor)
 library(tidybayes)
 library(scales)
-
+source('code/custom_functions/load_updated_gams.R')
 
 # make model table --------------------------------------------------------
 
-updated_gams = readRDS(file = "models/updated_gams.rds")  
+updated_gams = load_updated_gams()
 
 model_formulas_list = list()
 
