@@ -88,7 +88,7 @@ compare_to_doughty = post_total_all %>%
                    xend = median(post_total_all %>% filter(chemical == "P") %>% pull(flux))/1000,
                    y = 0,
                    yend = 0.88)) +
-  scale_x_log10(labels = comma,
+  scale_x_log10(labels = scales::label_comma(),
                 breaks = c(2500, 5000, 10000, 20000)) +
   theme(axis.text.y = element_blank(),
         axis.title.y = element_blank(),
