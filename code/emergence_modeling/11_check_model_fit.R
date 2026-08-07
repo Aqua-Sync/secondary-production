@@ -200,11 +200,14 @@ post_taxa_emerge = mod_taxa_emerge$data %>%
   add_epred_draws(mod_taxa_emerge, re_formula = "~ (1|taxon_original)") %>% 
   mutate(.epred = .epred*mean_emergence,
          stream_temp = stream_temp_s*sd_temp + mean_temp) %>% 
-  left_join(taxon_names)
+  left_join(taxon_names) %>% 
+  group_by(stream_temp, taxon) %>% 
+  median_qi(.epred)
 
 plot_taxa_emerge = post_taxa_emerge %>% 
   ggplot(aes(x = stream_temp, y = .epred, fill = taxon)) +
-  stat_lineribbon(alpha = 0.25) +
+  geom_line() +
+  geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha = 0.25) +
   facet_wrap(~taxon) +
   scale_y_log10() +
   geom_point(data = mod_taxa_data %>% left_join(taxon_names), aes(y = .epred,
