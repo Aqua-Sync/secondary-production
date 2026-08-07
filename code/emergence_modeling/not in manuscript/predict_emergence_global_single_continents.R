@@ -11,7 +11,7 @@ data_to_predict_list = readRDS("data/data_to_predict.rds") %>% group_by(region) 
   left_join(readRDS("data/hybas_regions.rds")) %>% 
   filter(region_name == continent) %>% group_split() # basin-level predictor variables by continent
 hybas_regions <- readRDS("data/hybas_regions.rds")
-final_mod = readRDS("models/final_mod.rds")
+final_mod = readRDS(   if (file.exists("models/final_mod.rds"))     "models/final_mod.rds"   else     "models/final_mod_small.rds" )
 mean_emergence = mean(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
 hybas_area = readRDS("data/HYBAS_surface_area_REDIST.rds") # redistributed surface areas from Jakob.
 post_pufa = readRDS(file = "posteriors/post_pufa.rds")

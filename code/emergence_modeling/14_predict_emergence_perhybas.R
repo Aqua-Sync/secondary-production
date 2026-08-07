@@ -21,7 +21,7 @@ hybas_regions <- readRDS("data/hybas_regions.rds")
 post_pufa = readRDS(file = "posteriors/post_pufa.rds")
 
 # load models
-final_mod = readRDS("models/final_mod.rds")
+final_mod = readRDS(   if (file.exists("models/final_mod.rds"))     "models/final_mod.rds"   else     "models/final_mod_small.rds" )
 
 # get max emergence to unstandardize
 mean_emergence = mean(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)

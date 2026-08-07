@@ -4,7 +4,7 @@ library(tidybayes)
 theme_set(theme_default())
 
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
-final_mod = readRDS("models/final_mod.rds")
+final_mod = readRDS(   if (file.exists("models/final_mod.rds"))     "models/final_mod.rds"   else     "models/final_mod_small.rds" )
 mean_emergence <- mean(emergence_production_with_vars$mean_emergence_mgdmm2y, na.rm = T)
 hybas_filter <- readRDS("data/hybas_filtered.rds")
 
