@@ -4,6 +4,7 @@ library(janitor)
 library(tidybayes)
 library(viridis)
 library(scales)
+library(ggridges)
 theme_set(theme_default())
 
 
