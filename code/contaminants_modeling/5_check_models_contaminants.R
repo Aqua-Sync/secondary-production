@@ -29,6 +29,7 @@ ggsave(pp_check_contaminants, file = "plots/pp_check_contaminants.jpg",
 
 
 # pufa models -------------------------------------------------------------
+emergence_production_with_vars = readRDS("data/emergence_production_with_vars.rds")
 pufa_data_short = readRDS("data/pufa_data.rds") %>% 
   filter(chemical == "epa + dha") %>%
   filter(!is.na(stream_temp)) %>% 
