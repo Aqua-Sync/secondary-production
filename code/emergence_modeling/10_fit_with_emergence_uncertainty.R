@@ -39,10 +39,14 @@ draws_list <- lapply(1:k, function(i) {
 #                      control = list(adapt_delta = 0.85))
 
 
-final_mod = update(readRDS("models/final_mod.rds"), chains = 4, iter = 2000, newdata = draws_list)
+# final_mod = update(readRDS("models/final_mod.rds"), chains = 4, iter = 2000, newdata = draws_list)
+# 
+# saveRDS(final_mod, file = 'models/final_mod.rds')
 
-saveRDS(final_mod, file = 'models/final_mod.rds')
-
+final_mod = readRDS(if (file.exists("models/final_mod.rds"))
+  "models/final_mod.rds"   
+  else    
+    "models/final_mod_small.rds" )
 
 # make a small version for github ----------------------------------------------------
 
@@ -58,7 +62,6 @@ saveRDS(final_mod, file = 'models/final_mod.rds')
 
 
 # get rhats for each imputation (got this from claude, hence the arrows!)
-final_mod = readRDS(file = 'models/final_mod.rds')
 
 library(posterior)
 

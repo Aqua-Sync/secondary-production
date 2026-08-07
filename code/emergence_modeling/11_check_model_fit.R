@@ -9,7 +9,7 @@ theme_set(theme_default())
 # final_model -------------------------------------------------------------
 
 #plot pp_checks
-final_mod = readRDS(file = 'models/final_mod.rds')
+final_mod = readRDS(   if (file.exists("models/final_mod.rds"))     "models/final_mod.rds"   else     "models/final_mod_small.rds" )
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds') %>% # use this for pp_checks b/c the final_mod.rds is a brm_multiple(). If we just run pp_check(final_mod), it will only check the fit for the first sample of data
   rename(emerge_mean_centered = emerge_1)
 
