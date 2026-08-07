@@ -77,6 +77,7 @@ model_data_all %>%
 length(unique(model_data_all$pub_name))
 
 # PUFA --------------------------------------------------------------------
+emergence_production_with_vars = readRDS("data/emergence_production_with_vars.rds")
 pufa_data_short = readRDS("data/pufa_data.rds") %>% 
   filter(chemical == "epa + dha") %>%
   filter(!is.na(stream_temp)) %>% 
