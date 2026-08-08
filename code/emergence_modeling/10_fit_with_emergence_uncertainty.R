@@ -50,7 +50,7 @@ final_mod = readRDS(if (file.exists("models/final_mod.rds"))
 
 # make a small version for github ----------------------------------------------------
 
-# k_small = 20
+k_small = 20
 # 
 # draws_list_small <- lapply(1:k_small, function(i) {
 #   df = posts_emergence %>% mutate(emerge_1 = emerge_mean_centered) %>% filter(.draw == i)
@@ -67,8 +67,8 @@ library(posterior)
 
 draws <- as_draws_array(final_mod)
 
-chains_per_imp <- 4
-m <- length(draws_list)
+chains_per_imp <- if(attributes(draws)$dim[1] == 1000) 4 else 1 # this selects the correct values depending on the model. the fitted brm model doesn't have these numbers directly stored, so this is hard coded
+m <- if(attributes(draws)$dim[1] == 1000) k else k_small # same as above
 
 draws_per_dat <- lapply(1:m, function(i) {
   chain_ids <- ((i - 1) * chains_per_imp + 1):(i * chains_per_imp)
