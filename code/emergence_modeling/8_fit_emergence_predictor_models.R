@@ -3,6 +3,7 @@ library(brms)
 library(janitor)
 library(tidybayes)
 library(scales)
+library(cowplot)
 
 source('code/custom_functions/load_updated_gams.R')
 
@@ -119,7 +120,7 @@ emergence_production_with_vars_taxa = readRDS(file = 'data/emergence_production_
 # 
 # saveRDS(mod_taxa_emerge, file = "models/mod_taxa_emerge.rds")
 
-
+mod_taxa_emerge = readRDS("models/mod_taxa_emerge.rds")
 
 # fit model with prop_diptera as predictor --------------------------------
 # load prop taxa, which is the posterior predictions from the model above. then add prop_diptera to the regression models. Does it improve fit?
