@@ -81,3 +81,12 @@ cas_names = bind_rows(cas_list)
 saveRDS(cas_names, file = "data/cas_names.rds")
 
 
+
+
+# make a csv of modeled_water ---------------------------------------------
+hybas_filtered = readRDS("data/hybas_filtered.rds")
+
+modeled_water_csv = modeled_water %>% filter(HYBAS_ID %in% unique(hybas_filtered))
+write_csv(modeled_water_csv, file = "data/modeled_water.csv")
+
+

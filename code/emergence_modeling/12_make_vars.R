@@ -26,8 +26,7 @@ source('code/custom_functions/estimate_streamtemp.R')
 #                  "hft_ix_s09",
 #                  "hft_ix_u09",
 #                 "crp_pc_sse",
-#                 "crp_pc_use",
-#                 "gad_id_smj")
+#                 "crp_pc_use")
 #
 # hydrobasin_vars_rssa_short = hydrobasin_vars_rssa %>% select(contains(vars_to_keep)) %>%
 #   mutate(region = str_sub(HYBAS_ID, 1, 1))

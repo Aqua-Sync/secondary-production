@@ -21,6 +21,7 @@ emergence_production_with_vars = readRDS(file = "data/emergence_production.rds")
   mutate(emerge_1 = mean_emergence_mgdmm2y/mean(mean_emergence_mgdmm2y, na.rm = T), #scale to max
          sd_emergence_1 = sd_emergence/max(mean_emergence_mgdmm2y, na.rm = T), # scale sd to max (this is correct, see plots below)
          mean_emergence = mean(mean_emergence_mgdmm2y, na.rm = T),
+         sd_emergence = sd(mean_emergence_mgdmm2y, na.rm = T),
          acsp_1 = acsp/max(acsp, na.rm = T),
          stream_temp = estimate_streamtemp(tmp_dc_syr10),
          stream_temp_s = scale(stream_temp),

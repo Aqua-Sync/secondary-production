@@ -11,6 +11,12 @@ library(scales)
 # load data
 contaminants = readRDS(file = "data/contaminants.rds")
 
+# save as csv
+write_csv(contaminants %>% 
+            filter(chemical_category %in% c("Se", "Pb", "Zn", "Hg", "Cu", "Cd",
+                                            "insecticide", "fungicide", "herbicide", 
+                                            "ECD", "pharmaceuticals")), file = "data/contaminants.csv")
+
 # standardize data and split by contaminant
 cont_split = contaminants %>% 
   filter(chemical_category %in% c("Se", "Pb", "Zn", "Hg", "Cu", "Cd",

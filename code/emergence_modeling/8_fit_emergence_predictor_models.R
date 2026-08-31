@@ -9,6 +9,16 @@ source('code/custom_functions/load_updated_gams.R')
 
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds')
 
+# remove attributes to save as a csv.
+emergence_noattributes = as_tibble(
+  lapply(emergence_production_with_vars, function(x) {
+    attributes(x) <- NULL
+    x
+  }),
+  check.names = FALSE)
+
+write_csv(emergence_noattributes, file = "data/emergence_production_with_vars.csv")
+
 length(unique(emergence_production_with_vars$author_year))
 
 mean_temp = attributes(emergence_production_with_vars$stream_temp_s)$`scaled:center`
