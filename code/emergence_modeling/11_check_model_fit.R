@@ -200,11 +200,13 @@ post_taxa_emerge = mod_taxa_emerge$data %>%
   add_epred_draws(mod_taxa_emerge, re_formula = "~ (1|taxon_original)") %>% 
   mutate(.epred = .epred*mean_emergence,
          stream_temp = stream_temp_s*sd_temp + mean_temp) %>% 
-  left_join(taxon_names) %>% 
+  left_join(taxon_names) 
+
+post_taxa_emerge_summary = post_taxa_emerge %>% 
   group_by(stream_temp, taxon) %>% 
   median_qi(.epred)
 
-plot_taxa_emerge = post_taxa_emerge %>% 
+plot_taxa_emerge = post_taxa_emerge_summary %>% 
   ggplot(aes(x = stream_temp, y = .epred, fill = taxon)) +
   geom_line() +
   geom_ribbon(aes(ymin = .lower, ymax = .upper), alpha = 0.25) +
@@ -225,7 +227,7 @@ saveRDS(plot_taxa_emerge, file = "plots/plot_taxa_emerge.rds")
 # taxon proportions
 post_taxa_pivot = post_taxa_emerge %>% 
   ungroup %>% 
-  group_by(taxon_original, .draw, stream_temp_s) %>% 
+  group_by(taxon_original, .draw, stream_temp) %>% 
   reframe(.epred = mean(.epred)) %>% # average over precip
   pivot_wider(names_from = taxon_original, values_from = .epred)
 
@@ -235,12 +237,43 @@ post_taxa_proportions = post_taxa_pivot %>% mutate(total = chi_sp + eph_sp + oth
   mutate(proportion = value/total)
 
 post_taxa_proportions %>% 
-  filter(stream_temp_s == min(stream_temp_s) | stream_temp_s == max(stream_temp_s) | stream_temp_s == median(stream_temp_s)) %>% 
-  group_by(stream_temp_s, name) %>% 
+  filter(stream_temp == min(stream_temp) | stream_temp == max(stream_temp) | stream_temp == median(stream_temp)) %>% 
+  group_by(stream_temp, name) %>% 
   median_qi(proportion) %>% 
-  arrange(name, stream_temp_s)
+  arrange(name, stream_temp)
   
 post_taxa_proportions %>% 
-  group_by(stream_temp_s, name) %>% 
-  ggplot(aes(x = stream_temp_s, y = proportion, fill = name, color = name)) +
+  group_by(stream_temp, name) %>% 
+  ggplot(aes(x = stream_temp, y = proportion, fill = name, color = name)) +
   stat_lineribbon(alpha = 0.25, .width = c(0.5, 0.75)) 
+
+
+# range of latitudes and temperatures of taxon collections
+emergence_production_with_vars_taxa |>
+  mutate(HYBAS_ID = as.numeric(HYBAS_ID)) |> 
+  left_join(readRDS("data/hybas_regions_centroids.rds")) |> 
+  group_by(taxon_original) |> 
+  filter(lat == max(lat) | lat == min(lat)) |> 
+  distinct(lat)
+
+emergence_production_with_vars_taxa |>
+  mutate(HYBAS_ID = as.numeric(HYBAS_ID)) |> 
+  left_join(readRDS("data/hybas_regions_centroids.rds")) |> 
+  group_by(taxon_original) |> 
+  filter(stream_temp == max(stream_temp) | stream_temp == min(stream_temp)) |> 
+  distinct(stream_temp)
+
+emergence_production_with_vars_taxa |>
+  mutate(HYBAS_ID = as.numeric(HYBAS_ID)) |> 
+  left_join(readRDS("data/hybas_regions_centroids.rds")) |> 
+  group_by(taxon_original) |> 
+  filter(stream_temp < 5) |> 
+  select(taxon_original, lat, site_id, mean_emergence_mgdmm2y) |> 
+  group_by(site_id) |> 
+  mutate(prop = mean_emergence_mgdmm2y/sum(mean_emergence_mgdmm2y)) |> 
+  # filter(taxon_original == "chi_sp") |> 
+  ungroup() |> 
+  group_by(taxon_original) |> 
+  reframe(mass = median(mean_emergence_mgdmm2y),
+          prop = median(prop))
+
