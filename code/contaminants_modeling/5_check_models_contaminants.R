@@ -36,7 +36,10 @@ pufa_data_short = readRDS("data/pufa_data.rds") %>%
   mutate(HYBAS_ID = as.character(HYBAS_ID)) %>% 
   mutate(stream_temp_s = (stream_temp - attributes(emergence_production_with_vars$stream_temp_s)[[2]])/attributes(emergence_production_with_vars$stream_temp_s)[[3]],
          log10_stream_temp = log10(stream_temp),
-         log10_stream_temp_s = scale(log10_stream_temp))
+         log10_stream_temp_s = scale(log10_stream_temp)) |> 
+  group_by(order) |> 
+  add_tally(name = "replicates") |> 
+  ungroup()
 
 pufa_mod_taxon_epadha = readRDS("models/pufa_mod_taxon_epadha.rds")
 
@@ -58,6 +61,8 @@ post_pufa_concentration %>%
 
 pufa_taxa_table = post_pufa_concentration %>% 
   group_by(order) %>% 
-  median_qi(adult_conc_mgpergram_dm)
+  median_qi(adult_conc_mgpergram_dm) |> 
+  left_join(pufa_data_short |> distinct(order, replicates)) |> 
+  select(order, replicates, everything())
 
 write_csv(pufa_taxa_table, file = "tables/pufa_taxa_table.csv")
