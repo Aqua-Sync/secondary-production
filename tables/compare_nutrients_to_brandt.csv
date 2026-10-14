@@ -1,6 +1,6 @@
 chemical,units,flux,.lower,.upper,.width,.point,.interval,notes
-C,kg_per_y_western_north_america,18288725.695642687,3807277.6398791233,55142294.855560005,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
-dm,kg_per_y_western_north_america,40641612.65698375,8460616.977509163,122538433.01235557,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
-N,kg_per_y_western_north_america,2902972.3326416966,604329.7841077973,8752745.215168254,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
-P,kg_per_y_western_north_america,147489.72335195716,30703.85193450906,444695.9262545161,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
-PUFA,kg_per_y_western_north_america,399072.61186917697,49265.779128795795,1812213.5939147808,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
+C,kg_per_y_western_north_america,18217287.49849409,3690161.8378076134,53759783.4186032,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
+dm,kg_per_y_western_north_america,40482861.10776463,8200359.639572473,119466185.37467375,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
+N,kg_per_y_western_north_america,2891632.936268903,585739.9742551767,8533298.95533384,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
+P,kg_per_y_western_north_america,146913.60885882328,29759.36965973882,433546.6404726064,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
+PUFA,kg_per_y_western_north_america,338154.7130909689,67072.97440285454,1722235.7720273687,0.95,median,qi,only drainages to the Pacific. Compare with Brandt et al. fluxes
