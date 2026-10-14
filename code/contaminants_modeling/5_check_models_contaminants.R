@@ -30,13 +30,7 @@ ggsave(pp_check_contaminants, file = "plots/pp_check_contaminants.jpg",
 
 # pufa models -------------------------------------------------------------
 emergence_production_with_vars = readRDS("data/emergence_production_with_vars.rds")
-pufa_data_short = readRDS("data/pufa_data.rds") %>% 
-  filter(chemical == "epa + dha") %>%
-  filter(!is.na(stream_temp)) %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID)) %>% 
-  mutate(stream_temp_s = (stream_temp - attributes(emergence_production_with_vars$stream_temp_s)[[2]])/attributes(emergence_production_with_vars$stream_temp_s)[[3]],
-         log10_stream_temp = log10(stream_temp),
-         log10_stream_temp_s = scale(log10_stream_temp)) |> 
+pufa_data_short = readRDS("data/pufa_data_short.rds") |> 
   group_by(order) |> 
   add_tally(name = "replicates") |> 
   ungroup()
@@ -48,8 +42,11 @@ pp_check(pufa_mod_taxon_epadha)
 max_y = unique(pufa_data_short$max_y)
 
 post_pufa_concentration = pufa_mod_taxon_epadha$data %>%
-  distinct(order, pub_name, HYBAS_ID) %>% 
-  add_epred_draws(pufa_mod_taxon_epadha, re_formula = NULL) %>% 
+  distinct(order) %>%
+  mutate(pub_name = as.character(runif(n())),
+         HYBAS_ID = as.character(runif(n()))) |> 
+  add_epred_draws(pufa_mod_taxon_epadha, re_formula = NULL,
+                  allow_new_levels = T) %>% 
   group_by(order, .draw) %>% 
   reframe(.epred = mean(.epred)) %>% 
   mutate(adult_conc_mgpergram_dm = (.epred*max_y)/1000)

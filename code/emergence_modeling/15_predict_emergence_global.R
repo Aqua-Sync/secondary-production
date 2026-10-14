@@ -27,7 +27,7 @@ system.time(
   for(i in seq_along(data_to_predict_list)) {
     post_total_region_summary[[i]] = data_to_predict_list[[i]] %>%
       select(HYBAS_ID, precip_s, stream_temp_s) %>%
-      # slice(1:100) %>%
+      slice(1:100) %>%
       mutate(author_year = "new") %>%
       left_join(hybas_area) %>%
       left_join(hybas_regions) %>%

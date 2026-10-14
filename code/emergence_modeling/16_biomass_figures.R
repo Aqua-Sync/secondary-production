@@ -390,7 +390,7 @@ simulate_pufa_temp_plot = plot_grid(effect_size_plot + labs(x = ""),
 
 ggsave(simulate_pufa_temp_plot, file = "plots/Figure_S13.jpg", width = 6, height = 9, dpi = 400)
 
-
+  
 
 # Figure S14: PUFA by taxa effect -----------------------------------------
 

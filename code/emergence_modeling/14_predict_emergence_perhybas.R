@@ -34,7 +34,7 @@ hybas_area = readRDS("data/HYBAS_surface_area_REDIST.rds") # redistributed surfa
 # 2) sample posterior -----------------------------------------------------
 # dry mass
 
-# estimates median and CrI's of emergence per hybas in standardized units of mgdmm2y/max(mgdmm2y)
+# estimates median and CrI's of emergence per hybas in standardized units of mgdmm2y/mean(mgdmm2y)
 post_summary = vector("list", length(data_to_predict_list))
 
 for(i in seq_along(data_to_predict_list)) {

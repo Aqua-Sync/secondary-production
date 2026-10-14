@@ -116,7 +116,7 @@ post_pufa_flux =  post_pufa %>%
 
 # combine pufa, mass, nutrients -------------------------------------------
 
-post_mass_nutrients_pufa = post_mass_nutrients %>%
+post_mass_nutrients_pufa = readRDS("posteriors/post_mass_nutrients.rds") %>%
   ungroup %>% 
   select(.draw, contains("m2")) %>% 
   pivot_longer(cols = -.draw) %>% 

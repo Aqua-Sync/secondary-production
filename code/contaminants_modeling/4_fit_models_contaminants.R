@@ -5,7 +5,6 @@ library(tidybayes)
 library(viridis)
 library(scales)
 
-
 # contaminants ------------------------------------------------------------
 
 # load data
@@ -83,18 +82,11 @@ model_data_all %>%
 length(unique(model_data_all$pub_name))
 
 # PUFA --------------------------------------------------------------------
-emergence_production_with_vars = readRDS("data/emergence_production_with_vars.rds")
-pufa_data_short = readRDS("data/pufa_data.rds") %>% 
-  filter(chemical == "epa + dha") %>%
-  filter(!is.na(stream_temp)) %>% 
-  mutate(HYBAS_ID = as.character(HYBAS_ID)) %>% 
-  mutate(stream_temp_s = (stream_temp - attributes(emergence_production_with_vars$stream_temp_s)[[2]])/attributes(emergence_production_with_vars$stream_temp_s)[[3]],
-         log10_stream_temp = log10(stream_temp),
-         log10_stream_temp_s = scale(log10_stream_temp))
+pufa_data_short = readRDS("data/pufa_data_short.rds")
 
-length(unique(pufa_data_short$pub_number))
+length(unique(pufa_data_short$pub_name))
 
-# pufa_mod = brm(y_s ~ 1 + (1|pub_name),
+# pufa_mod = brm(y_s ~ 1 + (1|pub_name) + (1|order) + (1|HYBAS_ID),
 #                data = pufa_data_short,
 #                family = Gamma(link = "log"),
 #                prior = c(prior(normal(-3, 1), class = Intercept),
@@ -104,10 +96,9 @@ length(unique(pufa_data_short$pub_number))
 
 pufa_mod = readRDS(file = "models/pufa_mod.rds")
 
-pufa_mod = update(pufa_mod, newdata = pufa_data_short, formula = . ~ 1 + (1|pub_name) + (1|order) + (1|HYBAS_ID))
+pufa_mod = update(pufa_mod, newdata = pufa_data_short)
 
 saveRDS(pufa_mod, file = "models/pufa_mod.rds")
-
 
 
 # re-run with just epa + dha data and taxon as varying intercept
@@ -123,11 +114,3 @@ pufa_mod_taxon_epadha_temp = update(readRDS(file = "models/pufa_mod_taxon_epadha
                                  (1|pub_name) + (1|order) + (1|HYBAS_ID))
 
 saveRDS(pufa_mod_taxon_epadha_temp, file = "models/pufa_mod_taxon_epadha_temp.rds")
-
-# re-run with log10temp as a predictor
-pufa_mod_taxon_epadha_logtemp = update(readRDS(file = "models/pufa_mod_taxon_epadha_temp.rds"), newdata = pufa_data_short, 
-                                    formula = . ~ s(log10_stream_temp_s) + 
-                                      (1|pub_name) + (1|order) + (1|HYBAS_ID))
-
-saveRDS(pufa_mod_taxon_epadha_logtemp, file = "models/pufa_mod_taxon_epadha_logtemp.rds")
-
