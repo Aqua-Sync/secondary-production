@@ -49,8 +49,9 @@ The scripts below are in the folders `code/emergence_modeling` or
 | emergence contaminants and PUFA prediction | 12_predict_PUFA_flux_compare_to_brandt.R | Compare insect Hg PUFA flux to salmong PUFA flux from Brandt et al. (2024). | NA |
 | emergence contaminants and PUFA prediction | 13_predict_relative_flux.R | Predict the relative flux of particular contaminants vs nutrients nutrients per HYBAS. | NA |
 | emergence contaminants and PUFA prediction | 14_relative_importance_modeling.R | Estimate the relative importance of contaminant concentrations vs. biomass in explaining flux of contaminants | NA |
-| emergence contaminants and PUFA prediction | 15_contaminant_figures | Generates figures of contaminants and PUFA used in the manuscript. | NA |
-| emergence contaminants and PUFA prediction | 16_contaminant_tables | Generates tables of contaminants and PUFA used in the manuscript. | NA |
+| emergence contaminants and PUFA prediction | 15_contaminant_figures.R | Generates figures of contaminants and PUFA used in the manuscript. | NA |
+| emergence contaminants and PUFA prediction | 16_contaminant_tables.R | Generates tables of contaminants and PUFA used in the manuscript. | NA |
+| emergence contaminants and PUFA prediction | water_script_wolfram.R | Generates aqueous predictions of water contaminant concentrations. | NA |
 
 ## Data
 
@@ -82,12 +83,17 @@ scripts above.
 | 21 | hydrobasin_vars_rssa_short.rds | HYBAS environmental parameters. | Used to create data \#10 (data_to_predict.rds) |
 | 22 | modeled_water.rds | Estimates of contaminant water concentrations in each HYBAS basin. | Used to predict contaminant export. |
 | 23 | modeled_water_ids_mean.rds | Same as modeled_water.rds, but for pesticides only | Used to predict pesticide export. |
-| 24 | pufa_data.rds | Wrangled concentraitons of PUFA concentrations in adult aquatic insects. | Used to model PUFA tissue concentrations. |
-| 25 | PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv | Raw (pre-wrangled) version of pufa_data.rds. | Similar to “AquaSync-Contaminant_transfer-2024-2-21_JMK(pufa).csv”, but with environmental attributes added. |
-| 26 | secondary_prod.csv | Wrangled secondary production estimates from the raw data: ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv | Used to model insect production as a fraction of community production. |
-| 27 | secondary_prod_sd.rds | Similar to ‘secondary_prod.csv’ but with the posterior standard deviation of aquatic insect secondary produciton. | Used to simulate draws of secondary production, generating uncertainty. |
-| 28 | secondary_prod_taxa.csv | Same as ‘secondary_prod.csv’, but for each taxon. | Used to model taxon-specific production. |
-| 29 | secondary_prod_with_attributes.rds | Same as ‘secondary_prod.csv’, but with environmental attributes. | Used to re-append attributes to emergence estimates before fitting with GAMs. |
+| 24 | AquaSync-Contaminant_transfer-2024-2-21_JMK(pufa).csv | Raw (pre-wrangled) version of pufa_data.rds. | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 25 | Strandberg_invert PUFA data FINAL.xlsx | Additional data from Strandberg et al. for PUFA | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 26 | Strandberg_PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv | Additional data from Strandberg et al. for PUFA | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 27 | pufa_data.rds | Wrangled concentraitons of PUFA concentrations in adult aquatic insects. | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 28 | PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv | PUFA data with environmental attributes | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 29 | pufa_orders.csv | Taxonomic orders for PUFA data | Intermediate PUFA tissue concentrations during wrangling of pufa_data_short. |
+| 30 | pufa_data_short.rds | Wrangled concentraitons of PUFA concentrations in adult aquatic insects. | Used to model PUFA tissue concentrations. |
+| 31 | secondary_prod.csv | Wrangled secondary production estimates from the raw data: ACSP_Data_ALL_ATTRIBUTES_PROCESSED_V3.csv | Used to model insect production as a fraction of community production. |
+| 32 | secondary_prod_sd.rds | Similar to ‘secondary_prod.csv’ but with the posterior standard deviation of aquatic insect secondary produciton. | Used to simulate draws of secondary production, generating uncertainty. |
+| 33 | secondary_prod_taxa.csv | Same as ‘secondary_prod.csv’, but for each taxon. | Used to model taxon-specific production. |
+| 34 | secondary_prod_with_attributes.rds | Same as ‘secondary_prod.csv’, but with environmental attributes. | Used to re-append attributes to emergence estimates before fitting with GAMs. |
 
 ## Packages
 
