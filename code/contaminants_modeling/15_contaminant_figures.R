@@ -8,7 +8,7 @@ library(ggridges)
 theme_set(theme_default())
 
 
-# Figure S8: Water contaminant ranges -------------------------------------
+# Figure S14: Water contaminant ranges -------------------------------------
 # Get ranges of aqueous contaminant concentrations globally and compare to the
 # range of contaminants in the HYBAS for which we have emergence measured. This 
 # provides a glimpse of the amount of mortality-driven contaminant effects that might
@@ -63,10 +63,10 @@ water_comparisons_densities = modeled_water_global_empirical %>%
         text = element_text(family = "sans"))
 
 ggsave(water_comparisons_densities, 
-       file = "plots/Figure_S8.jpg", 
+       file = "plots/Figure_S14.jpg", 
        dpi = 400, width = 6.5, height = 7)
 
-# Figure S11: contaminant regressions -------------------------------------
+# Figure S22: contaminant regressions -------------------------------------
 
 
 mod_list = readRDS(file = "models/mod_list.rds")
@@ -120,7 +120,7 @@ chem_concentrations_posts = chem_regression_posts %>%
         text = element_text(family = "sans"),
         plot.subtitle = element_text(face = "bold")) 
 
-ggsave(chem_concentrations_posts, file = "plots/Figure_S11.jpg",
+ggsave(chem_concentrations_posts, file = "plots/Figure_S22.jpg",
        width = 6.5, height = 6.5)
 
 

@@ -194,6 +194,6 @@ c = ept_plot$`stream_temp_s:precip_s`+ labs(y = "Annual Insect Emergence Product
   theme_cowplot()
 
 plot_taxonomic_effect = a/b/c + plot_layout(axis_titles = "collect", guides = "collect")
-saveRDS(plot_taxonomic_effect, file = "plots/plot_taxonomic_effect.rds")
-ggsave(plot_taxonomic_effect, file = "plots/plot_taxonomic_effect.jpg", dpi = 400, width = 7, height = 8)
+saveRDS(plot_taxonomic_effect, file = "plots/Figure_S15.rds")
+ggsave(plot_taxonomic_effect, file = "plots/Figure_S15.jpg", dpi = 400, width = 7, height = 8)
 

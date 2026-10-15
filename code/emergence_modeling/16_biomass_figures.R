@@ -211,7 +211,7 @@ emergence_prediction = emergence_two_plots | raw_v_modeled +
 ggsave(emergence_prediction, file = "plots/Figure_S7.jpg", width = 9, height = 5, dpi = 400)
 
 
-# Figure S7: direct vs converted measures of emergence --------------------
+# Figure S12: direct vs converted measures of emergence --------------------
 emergence_production_with_vars = readRDS(file = 'data/emergence_production_with_vars.rds') %>% 
   mutate(source = case_when(empirical_emergence == "no" ~ "Converted from ACSP",
                             TRUE ~ "Directly Measured")) %>% 
@@ -266,10 +266,10 @@ compare_measures_plot = a_dir_conv/b_dir_conv + plot_layout(axis_titles = "colle
                                                                                              legend.text = element_text(size = 8),
                                                                                              plot.subtitle = element_text(face = "bold"))
 
-ggsave(compare_measures_plot, file = "plots/Figure_S7.jpg", width = 5, height = 6)
+ggsave(compare_measures_plot, file = "plots/Figure_S12.jpg", width = 5, height = 6)
 
 
-# Figure S13: Simulate PUFA temperature effect ----------------------------
+# Figure S16: Simulate PUFA temperature effect ----------------------------
 
 # Simulate PUFA flux under assumption that it declines by 50% across global temperatures. This would be an extreme scenario. The purpose is to check how
 # much of a difference even this extreme scenario makes to global flux. i.e., we did not correct for temperature in our PUFA modeling, so this asks "what if we did"?
@@ -388,14 +388,13 @@ simulate_pufa_temp_plot = plot_grid(effect_size_plot + labs(x = ""),
                                     ncol = 1, align = "v",
                                     labels = "AUTO", label_x = 0, label_y = 1)
 
-ggsave(simulate_pufa_temp_plot, file = "plots/Figure_S13.jpg", width = 6, height = 9, dpi = 400)
+ggsave(simulate_pufa_temp_plot, file = "plots/Figure_S16.jpg", width = 6, height = 9, dpi = 400)
 
   
 
-# Figure S14: PUFA by taxa effect -----------------------------------------
+# Figure S15: PUFA by taxa effect -----------------------------------------
 
-plot_taxa_emerge = readRDS("plots/plot_taxa_emerge.rds")
-plot_taxonomic_effect = readRDS("plots/plot_taxonomic_effect.rds")
+Figure_S15 = readRDS(file = "plots/Figure_S15.rds")
+ggsave(Figure_S15, file = "plots/Figure_S15.jpg", dpi = 400, width = 7, height = 8)
 
-plot_taxa_emerge/plot_taxonomic_effect
 
