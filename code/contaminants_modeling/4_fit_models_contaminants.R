@@ -8,7 +8,7 @@ library(scales)
 # contaminants ------------------------------------------------------------
 
 # load data
-contaminants = readRDS(file = "data/contaminants.rds")
+contaminants = readRDS(file = "data/contaminants.rds") 
 
 # save as csv
 write_csv(contaminants %>% 
@@ -62,21 +62,15 @@ cont_split = contaminants %>%
 # 
 # saveRDS(mod_list, file = "models/mod_list.rds")
 
-mod_list = readRDS(file = "models/mod_list.rds")
+mod_list = readRDS(file = "models/mod_list.rds")[1:9]
 
 # number of records we modeled
-
 model_data_all = mod_list %>% 
   map("data") %>% 
   bind_rows(.id = "model_id")
 
 # number of distinct data points total
-nrow(distinct(model_data_all))
-
-# number of distinct data points per model
-model_data_all %>% 
-  group_by(model_id) %>% 
-  tally()
+nrow(model_data_all)
 
 # number of distinct publications
 length(unique(model_data_all$pub_name))

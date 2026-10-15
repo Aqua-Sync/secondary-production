@@ -100,7 +100,7 @@ pufa_raw_initial = read_csv("data/AquaSync-Contaminant_transfer-2024-2-21_JMK(pu
   mutate(chemical = str_to_lower(chemical)) 
 
 # load environmental attributes to join with pufa data
-strandberg_attributes = read_csv("data/Standberg_PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv") |>
+strandberg_attributes = read_csv("data/Strandberg_PUFA_Data_ALL_ATTRIBUTES_PROCESSED_V1.csv") |>
   clean_names() |> 
   distinct() %>% 
   mutate(tmp_dc_syr10 = tmp_dc_syr/10, # put temps in dec C instead of 10*dec C

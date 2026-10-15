@@ -225,6 +225,7 @@ saveRDS(plot_taxa_emerge, file = "plots/plot_taxa_emerge.rds")
 
 
 # taxon proportions
+
 post_taxa_pivot = post_taxa_emerge %>% 
   ungroup %>% 
   group_by(taxon_original, .draw, stream_temp) %>% 
@@ -232,15 +233,21 @@ post_taxa_pivot = post_taxa_emerge %>%
   pivot_wider(names_from = taxon_original, values_from = .epred)
 
 
-post_taxa_proportions = post_taxa_pivot %>% mutate(total = chi_sp + eph_sp + other_sp + ple_sp + tri_sp) %>% 
+post_taxa_proportions = post_taxa_pivot %>% 
+  mutate(total = chi_sp + eph_sp + other_sp + ple_sp + tri_sp) %>% 
   pivot_longer(cols = ends_with("_sp")) %>% 
   mutate(proportion = value/total)
 
 post_taxa_proportions %>% 
-  filter(stream_temp == min(stream_temp) | stream_temp == max(stream_temp) | stream_temp == median(stream_temp)) %>% 
-  group_by(stream_temp, name) %>% 
+  mutate(temp_range = case_when(stream_temp <= 5 ~ "cold",
+                                stream_temp >= 20 ~ "warm",
+                                T ~ "moderate")) |> 
+  # filter(stream_temp == min(stream_temp) | stream_temp == max(stream_temp) | stream_temp == median(stream_temp)) %>% 
+  group_by(temp_range, name, .draw) %>% 
+  reframe(proportion = mean(proportion)) |> 
+  group_by(temp_range, name) |> 
   median_qi(proportion) %>% 
-  arrange(name, stream_temp)
+  arrange(name, temp_range)
   
 post_taxa_proportions %>% 
   group_by(stream_temp, name) %>% 
